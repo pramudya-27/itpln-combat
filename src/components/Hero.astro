@@ -4,10 +4,10 @@ import '../styles/hero.css';
 ---
 
 <div class="hero">
-  <!-- Efek Pendaran Cahaya & Kilatan Merah (Light Effect Burst) -->
+  <!-- Efek Pendaran Cahaya & Kilatan Merah Halus Tanpa Kotak -->
   <div class="hero-light-effect" id="hero-light-effect" aria-hidden="true"></div>
 
-  <!-- Komposisi Petir Utama ITPLN COMBAT: Petir Merah Bergetar + Sambaran Putih-Kemerahan + Percikan Listrik -->
+  <!-- Komposisi Petir Utama ITPLN COMBAT -->
   <div
     class="hero-lightning-container"
     id="hero-lightning-container"
@@ -18,26 +18,11 @@ import '../styles/hero.css';
     <svg
       class="hero-lightning-svg"
       id="hero-lightning-svg"
-      viewBox="0 0 460 700"
+      viewBox="-70 -70 600 840"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <!-- Filter Cahaya Merah Neon (Light Effect Bloom) -->
-        <filter id="neon-red-glow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1" />
-          <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur2" />
-          <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur3" />
-          <feGaussianBlur in="SourceGraphic" stdDeviation="55" result="blur4" />
-          <feMerge>
-            <feMergeNode in="blur4" />
-            <feMergeNode in="blur3" />
-            <feMergeNode in="blur2" />
-            <feMergeNode in="blur1" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-
         <!-- Gradien Petir Merah Utama -->
         <linearGradient id="redBoltGrad" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stop-color="#ff333d" />
@@ -46,12 +31,11 @@ import '../styles/hero.css';
           <stop offset="100%" stop-color="#6b0a0e" />
         </linearGradient>
 
-        <!-- Gradien Petir Putih Kemerahan Solid -->
+        <!-- Gradien Garis Petir Putih Kemerahan -->
         <linearGradient id="whiteRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#ffffff" />
-          <stop offset="60%" stop-color="#ffffff" />
-          <stop offset="85%" stop-color="#fff2f4" />
-          <stop offset="100%" stop-color="#ffccd2" />
+          <stop offset="55%" stop-color="#fff0f2" />
+          <stop offset="100%" stop-color="#ff4d58" />
         </linearGradient>
 
         <!-- Gradien Sambaran Garis Listrik -->
@@ -62,7 +46,7 @@ import '../styles/hero.css';
         </linearGradient>
       </defs>
 
-      <!-- 1. Grup Petir Merah Besar (Muncul + Bergetar Hebat Saat Tersambar) -->
+      <!-- 1. Grup Petir Merah Besar (Muncul + Bergetar Saat Tersambar) -->
       <g class="bolt-red-group" id="bolt-red-group">
         <path
           class="bolt-red-body"
@@ -76,45 +60,44 @@ import '../styles/hero.css';
           d="M 207 0 L 460 0 L 276 315 L 460 315 L 0 700 L 175 385 L 0 385 Z"
           fill="none"
           stroke="#ff2635"
-          stroke-width="5"
+          stroke-width="3.5"
           stroke-linejoin="miter"
-          filter="url(#neon-red-glow)"
         />
       </g>
 
-      <!-- 2. Petir Putih-Kemerahan (Bentuk SAMA PERSIS dengan Petir Merah, Tanpa Background Putih) -->
+      <!-- 2. Sambaran Petir Putih-Kemerahan (Murni Garis Stroke Tanpa Kotak Clip/Filter) -->
       <g class="white-red-strike-group" id="white-red-strike-group">
-        <!-- Pendaran Neon Merah Elektrik mengikuti bentuk persis petir merah -->
+        <!-- Garis Aura Merah di Tepian Petir -->
         <path
-          class="strike-outer-neon"
+          class="strike-stroke-path strike-outer-neon"
+          pathLength="1000"
           d="M 207 0 L 460 0 L 276 315 L 460 315 L 0 700 L 175 385 L 0 385 Z"
           fill="none"
           stroke="#ff1e2b"
-          stroke-width="16"
+          stroke-width="10"
           stroke-linejoin="miter"
-          filter="url(#neon-red-glow)"
-          opacity="0.95"
+          opacity="0.7"
         />
-        <!-- Garis Petir Putih-Kemerahan Tajam (tanpa fill putih) -->
+        <!-- Garis Inti Putih-Kemerahan Menyambar Mengikuti Bentuk Petir -->
         <path
-          class="strike-main-body"
+          class="strike-stroke-path strike-main-body"
+          pathLength="1000"
           d="M 207 0 L 460 0 L 276 315 L 460 315 L 0 700 L 175 385 L 0 385 Z"
           fill="none"
           stroke="url(#whiteRedGrad)"
-          stroke-width="6"
+          stroke-width="4"
           stroke-linejoin="miter"
-          filter="url(#neon-red-glow)"
         />
-        <!-- Inti Kilat Putih Terang Menyambar di Tepian & Tengah Petir -->
+        <!-- Kilatan Inti Tengah Petir -->
         <path
-          class="strike-pure-white-core"
-          d="M 330 0 L 160 350 L 320 350 L 18 680"
+          class="strike-stroke-path strike-pure-white-core"
+          pathLength="1000"
+          d="M 330 6 L 165 348 L 325 348 L 16 686"
           fill="none"
           stroke="#ffffff"
-          stroke-width="4"
+          stroke-width="3"
           stroke-linecap="round"
           stroke-linejoin="miter"
-          filter="url(#neon-red-glow)"
         />
         <!-- Sambaran Sinar Listrik Diagonal ke Bawah Kanan -->
         <path
@@ -122,30 +105,27 @@ import '../styles/hero.css';
           d="M 460 315 L 495 365 L 472 382 L 505 430"
           fill="none"
           stroke="url(#streakGrad)"
-          stroke-width="4"
+          stroke-width="3.5"
           stroke-linecap="round"
           stroke-linejoin="miter"
-          filter="url(#neon-red-glow)"
         />
       </g>
 
       <!-- 3. Percikan Listrik & Cabang Kilat (Electric Sparks) -->
-      <g class="electric-sparks-group" id="electric-sparks-group" filter="url(#neon-red-glow)">
-        <!-- Cabang kilat kecil menyebar -->
-        <path class="spark-arc arc-1" d="M 305 210 L 245 185 L 220 205 L 185 180" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-        <path class="spark-arc arc-2" d="M 410 345 L 448 320 L 435 290 L 460 270" stroke="#ff5c66" stroke-width="2.5" stroke-linecap="round" />
-        <path class="spark-arc arc-3" d="M 276 345 L 210 375 L 195 355 L 145 385" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-        <path class="spark-arc arc-4" d="M 290 515 L 225 545 L 210 580 L 170 605" stroke="#ff4d58" stroke-width="2.5" stroke-linecap="round" />
+      <g class="electric-sparks-group" id="electric-sparks-group">
+        <path class="spark-arc arc-1" d="M 305 210 L 245 185 L 220 205 L 185 180" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+        <path class="spark-arc arc-2" d="M 410 345 L 448 320 L 435 290 L 465 268" stroke="#ff5c66" stroke-width="2.2" stroke-linecap="round" />
+        <path class="spark-arc arc-3" d="M 276 345 L 210 375 L 195 355 L 145 385" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+        <path class="spark-arc arc-4" d="M 290 515 L 225 545 L 210 580 L 170 605" stroke="#ff4d58" stroke-width="2.2" stroke-linecap="round" />
 
-        <!-- Partikel percikan bunga api listrik beterbangan -->
-        <circle class="spark-dot dot-1" cx="310" cy="210" r="4" fill="#ffffff" />
-        <circle class="spark-dot dot-2" cx="405" cy="220" r="3.5" fill="#ff4d58" />
-        <circle class="spark-dot dot-3" cx="278" cy="345" r="4.5" fill="#ffffff" />
-        <circle class="spark-dot dot-4" cx="408" cy="350" r="4" fill="#ff3b47" />
-        <circle class="spark-dot dot-5" cx="290" cy="512" r="4" fill="#ffffff" />
-        <circle class="spark-dot dot-6" cx="365" cy="515" r="3.5" fill="#ff5c66" />
-        <circle class="spark-dot dot-7" cx="240" cy="640" r="4.5" fill="#ffffff" />
-        <circle class="spark-dot dot-8" cx="190" cy="385" r="3.5" fill="#ff3b47" />
+        <circle class="spark-dot dot-1" cx="310" cy="210" r="3.5" fill="#ffffff" />
+        <circle class="spark-dot dot-2" cx="405" cy="220" r="3" fill="#ff4d58" />
+        <circle class="spark-dot dot-3" cx="278" cy="345" r="4" fill="#ffffff" />
+        <circle class="spark-dot dot-4" cx="408" cy="350" r="3.5" fill="#ff3b47" />
+        <circle class="spark-dot dot-5" cx="290" cy="512" r="3.5" fill="#ffffff" />
+        <circle class="spark-dot dot-6" cx="365" cy="515" r="3" fill="#ff5c66" />
+        <circle class="spark-dot dot-7" cx="240" cy="640" r="4" fill="#ffffff" />
+        <circle class="spark-dot dot-8" cx="190" cy="385" r="3" fill="#ff3b47" />
       </g>
     </svg>
   </div>
@@ -173,7 +153,6 @@ import '../styles/hero.css';
 </div>
 
 <script is:inline>
-  // Interaksi Parallax Kursor & Trigger Petir Menyambar Ulang
   const heroContainer = document.getElementById('hero-lightning-container');
   const heroFlash = document.getElementById('hero-light-effect');
   const boltRedGroup = document.getElementById('bolt-red-group');
@@ -181,15 +160,14 @@ import '../styles/hero.css';
   const sparksGroup = document.getElementById('electric-sparks-group');
 
   function retriggerLightningStrike() {
-    const targets = [
-      { el: heroFlash, anim: 'lightEffectBurst 1.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards' },
-      { el: boltRedGroup, anim: 'redBoltImpactShake 1.1s cubic-bezier(0.2, 0.9, 0.3, 1) forwards' },
-      { el: strikeGroup, anim: 'whiteRedStrikeAnim 1.3s cubic-bezier(0.15, 0.85, 0.2, 1) forwards' },
-    ];
+    if (heroFlash) heroFlash.style.animation = 'none';
+    if (boltRedGroup) boltRedGroup.style.animation = 'none';
 
-    targets.forEach(({ el }) => {
-      if (el) el.style.animation = 'none';
-    });
+    if (strikeGroup) {
+      strikeGroup.classList.remove('strike-run');
+      void strikeGroup.offsetWidth;
+      strikeGroup.classList.add('strike-run');
+    }
 
     if (sparksGroup) {
       sparksGroup.classList.remove('sparks-active');
@@ -197,17 +175,18 @@ import '../styles/hero.css';
       sparksGroup.classList.add('sparks-active');
     }
 
-    targets.forEach(({ el, anim }) => {
-      if (el) {
-        void el.offsetWidth;
-        el.style.animation = anim;
-      }
-    });
+    if (heroFlash) {
+      void heroFlash.offsetWidth;
+      heroFlash.style.animation = 'lightEffectBurst 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards';
+    }
+    if (boltRedGroup) {
+      void boltRedGroup.offsetWidth;
+      boltRedGroup.style.animation = 'redBoltImpactShake 1.05s cubic-bezier(0.2, 0.9, 0.3, 1) forwards';
+    }
   }
 
-  if (sparksGroup) {
-    sparksGroup.classList.add('sparks-active');
-  }
+  if (strikeGroup) strikeGroup.classList.add('strike-run');
+  if (sparksGroup) sparksGroup.classList.add('sparks-active');
 
   if (heroContainer) {
     window.addEventListener('mousemove', (e) => {

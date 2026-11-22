@@ -66,8 +66,11 @@ collections:
         widget: "image"
         media_folder: "/public/uploads/news"
         public_folder: "/uploads/news"
+        media_library:
+          config:
+            max_file_size: 3145728
         required: true
-        hint: "Unggah foto berita (disarankan rasio 16:9, maks 1600px, di bawah 500 KB) atau masukkan URL gambar"
+        hint: "Aturan Upload: Maksimal 2–3 MB per foto (JPG/PNG/WEBP). Masuk ke Cloudinary (dkrxyn8i5) folder itpln-combat/news."
 
       - label: "Alt Text Gambar"
         name: "imageAlt"
@@ -173,8 +176,11 @@ collections:
         widget: "image"
         media_folder: "/public/uploads/gallery"
         public_folder: "/uploads/gallery"
+        media_library:
+          config:
+            max_file_size: 3145728
         required: true
-        hint: "Unggah file foto atau masukkan URL gambar eksternal yang valid"
+        hint: "Aturan Upload: Maksimal 2–3 MB per foto (JPG/PNG/WEBP). Masuk ke Cloudinary (dkrxyn8i5) folder itpln-combat/gallery."
 
       - label: "Alt Text Gambar"
         name: "alt"

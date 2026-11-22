@@ -1,6 +1,7 @@
 import aboutData from '../../src/data/about.json' with { type: 'json' };
 import disciplinesData from '../../src/data/disciplines.json' with { type: 'json' };
 import settingsData from '../../src/data/settings.json' with { type: 'json' };
+import { uploadToCloudinary, MAX_PHOTO_BYTES, MAX_PHOTO_MB_LABEL } from '../../src/lib/cloudinary.js';
 
 // In-memory store for serverless session + pre-loaded repo config files
 const memoryFiles = new Map([
@@ -168,15 +169,35 @@ export async function handler(event) {
       }
       const assets = Array.isArray(params.assets) ? params.assets : [];
       for (const a of assets) {
+        const buf = Buffer.from(a.content || '', 'base64');
+        if (buf.length > MAX_PHOTO_BYTES) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+              error: `Ukuran foto (${(buf.length / (1024 * 1024)).toFixed(2)} MB) melebihi batas maksimal ${MAX_PHOTO_MB_LABEL}!`,
+            }),
+          };
+        }
         const p = String(a.path || '').replace(/^\/+/, '');
-        const dataUrl = `data:image/jpeg;base64,${a.content || ''}`;
+        const subFolder = p.includes('/news/') ? 'news' : 'gallery';
+        let finalUrl = `data:image/jpeg;base64,${a.content || ''}`;
+        try {
+          const cld = await uploadToCloudinary({
+            base64Content: a.content || '',
+            subFolder,
+            publicId: p.split('/').pop().replace(/\.[^.]+$/, ''),
+          });
+          if (cld.uploadedToCloudinary && cld.url) finalUrl = cld.url;
+        } catch {}
+
         memoryMedia.set(p, {
           id: p,
           name: p.split('/').pop(),
           path: p,
-          url: dataUrl,
-          displayURL: dataUrl,
-          size: (a.content || '').length,
+          url: finalUrl,
+          displayURL: finalUrl,
+          size: buf.length,
           isDirectory: false,
         });
       }
@@ -213,15 +234,35 @@ export async function handler(event) {
 
     if (action === 'persistMedia') {
       const a = params.asset || {};
+      const buf = Buffer.from(a.content || '', 'base64');
+      if (buf.length > MAX_PHOTO_BYTES) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            error: `Ukuran foto (${(buf.length / (1024 * 1024)).toFixed(2)} MB) melebihi batas maksimal ${MAX_PHOTO_MB_LABEL}!`,
+          }),
+        };
+      }
       const p = String(a.path || '').replace(/^\/+/, '');
-      const dataUrl = `data:image/jpeg;base64,${a.content || ''}`;
+      const subFolder = p.includes('/news/') ? 'news' : 'gallery';
+      let finalUrl = `data:image/jpeg;base64,${a.content || ''}`;
+      try {
+        const cld = await uploadToCloudinary({
+          base64Content: a.content || '',
+          subFolder,
+          publicId: p.split('/').pop().replace(/\.[^.]+$/, ''),
+        });
+        if (cld.uploadedToCloudinary && cld.url) finalUrl = cld.url;
+      } catch {}
+
       const item = {
         id: p,
         name: p.split('/').pop(),
         path: p,
-        url: dataUrl,
-        displayURL: dataUrl,
-        size: (a.content || '').length,
+        url: finalUrl,
+        displayURL: finalUrl,
+        size: buf.length,
         isDirectory: false,
       };
       memoryMedia.set(p, item);

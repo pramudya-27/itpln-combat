@@ -9,6 +9,7 @@ import {
   formatJakartaDate,
   formatShortJakartaDate,
 } from './dateStatus.js';
+import { resolveCloudinaryUrl } from './cloudinary.js';
 
 /**
  * Mengambil seluruh item News dari Astro Content Collection (src/content/news/*.md)
@@ -38,7 +39,7 @@ export async function getAllNews(options = {}) {
       description: data.description,
       body: entry.body,
       render: () => entry.render(),
-      featuredImage: data.featuredImage,
+      featuredImage: resolveCloudinaryUrl(data.featuredImage, 1200),
       imageAlt: data.imageAlt || data.title,
       category: data.category,
       author: data.author || 'Tim Humas ITPLN COMBAT',
@@ -83,7 +84,7 @@ export async function getAllGallery(options = {}) {
       id: entry.id,
       title: data.title,
       description: data.description,
-      image: data.image,
+      image: resolveCloudinaryUrl(data.image, 1200),
       alt: data.alt || data.title,
       category: data.category,
       date: String(data.date),

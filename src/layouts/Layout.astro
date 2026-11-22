@@ -75,6 +75,34 @@ const {
       ) {
         window.location.replace('/cms/' + window.location.hash);
       }
+
+      // Hilangkan watermark / floating badge "Powered by Netlify" jika diinjeksi oleh Netlify
+      function removeNetlifyWatermark() {
+        document.querySelectorAll('a, div, aside, iframe, span').forEach((el) => {
+          const txt = (el.textContent || '').trim();
+          const href = el.getAttribute?.('href') || '';
+          const src = el.getAttribute?.('src') || '';
+          if (
+            txt === 'Powered by Netlify' ||
+            (txt.includes('Powered by Netlify') && el.children.length <= 3) ||
+            href.includes('netlify.com') ||
+            src.includes('app.netlify.com') ||
+            el.id?.includes('netlify')
+          ) {
+            const fixedParent = el.closest('[style*="position: fixed"], [style*="position:fixed"]');
+            if (fixedParent && fixedParent !== document.body) {
+              fixedParent.remove();
+            } else {
+              el.remove();
+            }
+          }
+        });
+      }
+      removeNetlifyWatermark();
+      new MutationObserver(removeNetlifyWatermark).observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
     </script>
   </body>
 </html>

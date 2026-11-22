@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { uploadToCloudinary, MAX_PHOTO_BYTES, MAX_PHOTO_MB_LABEL } from './cloudinary.js';
 
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'itplncombat713';
@@ -70,8 +71,8 @@ function readJsonBody(req) {
     let raw = '';
     req.on('data', (chunk) => {
       raw += chunk;
-      if (raw.length > 20 * 1024 * 1024) {
-        reject(new Error('Payload terlalu besar'));
+      if (raw.length > 6 * 1024 * 1024) {
+        reject(new Error(`Ukuran foto melebihi batas maksimal ${MAX_PHOTO_MB_LABEL}!`));
       }
     });
     req.on('end', () => {
@@ -91,7 +92,7 @@ function sendJson(res, status, obj) {
   res.end(JSON.stringify(obj));
 }
 
-function handleDecapProxyAction(body) {
+async function handleDecapProxyAction(body) {
   ensureDirs();
   const { action, params = {} } = body;
 
@@ -180,9 +181,20 @@ function handleDecapProxyAction(body) {
     }
 
     for (const asset of assets) {
-      const { resolved } = safeRepoPath(asset.path);
-      fs.mkdirSync(path.dirname(resolved), { recursive: true });
       const buf = Buffer.from(asset.content || '', asset.encoding || 'base64');
+      if (buf.length > MAX_PHOTO_BYTES) {
+        throw new Error(`Ukuran foto (${(buf.length / (1024 * 1024)).toFixed(2)} MB) melebihi batas maksimal ${MAX_PHOTO_MB_LABEL}!`);
+      }
+      const { clean, resolved } = safeRepoPath(asset.path);
+      const subFolder = clean.includes('/news/') ? 'news' : 'gallery';
+      try {
+        await uploadToCloudinary({
+          base64Content: asset.content || '',
+          subFolder,
+          publicId: path.basename(clean).replace(/\.[^.]+$/, ''),
+        });
+      } catch {}
+      fs.mkdirSync(path.dirname(resolved), { recursive: true });
       fs.writeFileSync(resolved, buf);
     }
 
@@ -222,10 +234,28 @@ function handleDecapProxyAction(body) {
   if (action === 'persistMedia') {
     const asset = params.asset || {};
     const { clean, resolved } = safeRepoPath(asset.path);
-    fs.mkdirSync(path.dirname(resolved), { recursive: true });
     const buf = Buffer.from(asset.content || '', asset.encoding || 'base64');
+    if (buf.length > MAX_PHOTO_BYTES) {
+      throw new Error(
+        `Ukuran foto (${(buf.length / (1024 * 1024)).toFixed(2)} MB) melebihi batas maksimal ${MAX_PHOTO_MB_LABEL}!`
+      );
+    }
+    const subFolder = clean.includes('/news/') ? 'news' : 'gallery';
+    let cldUrl = null;
+    try {
+      const cldRes = await uploadToCloudinary({
+        base64Content: asset.content || '',
+        subFolder,
+        publicId: path.basename(clean).replace(/\.[^.]+$/, ''),
+      });
+      if (cldRes.uploadedToCloudinary && cldRes.url) {
+        cldUrl = cldRes.url;
+      }
+    } catch {}
+
+    fs.mkdirSync(path.dirname(resolved), { recursive: true });
     fs.writeFileSync(resolved, buf);
-    const publicUrl = '/' + clean.replace(/^public\/?/, '');
+    const publicUrl = cldUrl || '/' + clean.replace(/^public\/?/, '');
     return {
       id: clean,
       name: path.basename(clean),
@@ -255,7 +285,7 @@ function attachAdminMiddleware(server) {
         }
         if (req.method === 'POST') {
           const body = await readJsonBody(req);
-          const result = handleDecapProxyAction(body);
+          const result = await handleDecapProxyAction(body);
           return sendJson(res, 200, result);
         }
       }

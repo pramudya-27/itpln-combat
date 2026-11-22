@@ -302,6 +302,9 @@
       <div class="decap-top-brand">
         <img src="/logo.webp" alt="Logo ITPLN COMBAT" />
         <span>ITPLN COMBAT • DECAP CMS</span>
+        <span style="font-family: Barlow, sans-serif; font-size: 12px; font-weight: 600; color: #9494a3; background: #17171f; border: 1px solid #2e2e3a; padding: 3px 9px; border-radius: 4px;">
+          ☁️ Cloudinary: dkrxyn8i5 (Maks 2–3 MB / Foto)
+        </span>
       </div>
       <div class="decap-bar-actions">
         <a href="/" class="decap-bar-btn">← Kembali ke Website</a>
@@ -373,6 +376,12 @@
                     widget: 'image',
                     media_folder: '/public/uploads/news',
                     public_folder: '/uploads/news',
+                    media_library: {
+                      config: {
+                        max_file_size: 3145728,
+                      },
+                    },
+                    hint: 'Aturan Upload: Maksimal 2–3 MB per foto (JPG/PNG/WEBP). Masuk ke Cloudinary (dkrxyn8i5) folder itpln-combat/news.',
                     required: true,
                   },
                   { label: 'Alt Text Gambar', name: 'imageAlt', widget: 'string', default: 'Dokumentasi Berita ITPLN COMBAT', required: true },
@@ -445,6 +454,12 @@
                     widget: 'image',
                     media_folder: '/public/uploads/gallery',
                     public_folder: '/uploads/gallery',
+                    media_library: {
+                      config: {
+                        max_file_size: 3145728,
+                      },
+                    },
+                    hint: 'Aturan Upload: Maksimal 2–3 MB per foto (JPG/PNG/WEBP). Masuk ke Cloudinary (dkrxyn8i5) folder itpln-combat/gallery.',
                     required: true,
                   },
                   { label: 'Alt Text Gambar', name: 'alt', widget: 'string', required: true },
@@ -543,6 +558,30 @@
       if (sessionStorage.getItem(SESSION_KEY)) {
         launchDecapCMS();
       }
+
+      // Validasi Ketat Ukuran Upload Foto di Admin (Maksimal 3 MB per foto)
+      const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
+      document.addEventListener(
+        'change',
+        (e) => {
+          const input = e.target;
+          if (input && input.tagName === 'INPUT' && input.type === 'file' && input.files?.length) {
+            for (const file of input.files) {
+              if (file.size > MAX_UPLOAD_BYTES) {
+                const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                alert(
+                  `Ukuran foto "${file.name}" (${sizeMb} MB) melebihi batas maksimal 3 MB!\n\nAturan Upload Admin: Maksimal 2–3 MB per foto. Silakan pilih atau kompres foto terlebih dahulu.`
+                );
+                input.value = '';
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                return false;
+              }
+            }
+          }
+        },
+        true
+      );
     </script>
   </body>
 </html>

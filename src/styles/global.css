@@ -346,3 +346,19 @@ td {
     scroll-behavior: auto !important;
   }
 }
+
+/* Sembunyikan Watermark / Badge / Drawer Injeksi Netlify */
+#netlify-drawer,
+[data-netlify-deploy-drawer],
+[id^="netlify-"],
+[class*="netlify-badge"],
+[class*="netlify-drawer"],
+iframe[src*="app.netlify.com"],
+a[href*="netlify.com"][target="_blank"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}

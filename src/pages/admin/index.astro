@@ -42,7 +42,7 @@
       body.cms-unlocked {
         background: #f4f5f7;
         color: #111;
-        padding-top: 48px;
+        padding-top: 0;
       }
 
       /* === LOGIN SCREEN === */
@@ -180,65 +180,36 @@
         display: none;
       }
 
-      /* === DECAP CMS TOP BAR === */
-      .decap-top-bar {
+      /* === FLOATING LOGOUT BUTTON === */
+      .decap-logout-fab {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 48px;
-        background: #0a0a0d;
-        border-bottom: 2px solid var(--a-red);
-        color: #fff;
+        bottom: 20px;
+        left: 20px;
         z-index: 99999;
         display: none;
         align-items: center;
-        justify-content: space-between;
-        padding: 0 18px;
-      }
-
-      .decap-top-bar.visible {
-        display: flex;
-      }
-
-      .decap-top-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-family: Anton, sans-serif;
-        font-size: 17px;
-        letter-spacing: 0.05em;
-      }
-
-      .decap-top-brand img {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-      }
-
-      .decap-bar-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .decap-bar-btn {
-        background: #17171f;
+        gap: 6px;
+        background: #101014;
         border: 1px solid #2e2e3a;
+        border-left: 3px solid var(--a-red);
         color: #fff;
         font-family: "Barlow Condensed", sans-serif;
         font-weight: 700;
-        font-size: 13px;
-        letter-spacing: 0.06em;
+        font-size: 14px;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        padding: 5px 12px;
-        border-radius: 5px;
+        padding: 8px 16px;
+        border-radius: 6px;
         cursor: pointer;
-        text-decoration: none;
-        transition: all 0.18s;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        transition: all 0.18s ease;
       }
 
-      .decap-bar-btn:hover {
+      .decap-logout-fab.visible {
+        display: inline-flex;
+      }
+
+      .decap-logout-fab:hover {
         background: var(--a-red);
         border-color: var(--a-red);
       }
@@ -297,20 +268,10 @@
       </div>
     </div>
 
-    <!-- 2. TOP BAR & MOUNT POINT DECAP CMS -->
-    <div id="decap-top-bar" class="decap-top-bar">
-      <div class="decap-top-brand">
-        <img src="/logo.webp" alt="Logo ITPLN COMBAT" />
-        <span>ITPLN COMBAT • DECAP CMS</span>
-        <span style="font-family: Barlow, sans-serif; font-size: 12px; font-weight: 600; color: #9494a3; background: #17171f; border: 1px solid #2e2e3a; padding: 3px 9px; border-radius: 4px;">
-          ☁️ Cloudinary: dkrxyn8i5 (Maks 2–3 MB / Foto)
-        </span>
-      </div>
-      <div class="decap-bar-actions">
-        <a href="/" class="decap-bar-btn">← Kembali ke Website</a>
-        <button type="button" id="btn-logout" class="decap-bar-btn">Logout</button>
-      </div>
-    </div>
+    <!-- 2. TOMBOL LOGOUT & MOUNT POINT DECAP CMS -->
+    <button type="button" id="btn-logout" class="decap-logout-fab">
+      Logout
+    </button>
 
     <div id="nc-root"></div>
 
@@ -332,7 +293,7 @@
 
       function launchDecapCMS() {
         document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('decap-top-bar').classList.add('visible');
+        document.getElementById('btn-logout').classList.add('visible');
         document.body.classList.add('cms-unlocked');
 
         if (cmsInitialized) return;

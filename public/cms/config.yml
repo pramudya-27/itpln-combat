@@ -4,7 +4,8 @@
 # =====================================================================
 
 backend:
-  name: git-gateway
+  name: proxy
+  proxy_url: /api/v1
   branch: main
 
 # Catatan Hosting & OAuth Backend:

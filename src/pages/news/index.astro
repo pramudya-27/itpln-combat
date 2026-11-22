@@ -1,0 +1,398 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import NewsModal from '../../components/NewsModal.astro';
+import { getAllNews } from '../../lib/content.js';
+import settings from '../../data/settings.json';
+
+// Ambil berita publik (tanpa Draft) dari Astro Content Collection
+const newsItems = await getAllNews({ includeDrafts: false });
+
+const categories = ['Semua', 'Kegiatan', 'Pertandingan', 'Latihan', 'Prestasi', 'Pengumuman'];
+const statusFilters = [
+  { code: 'Semua', label: 'Semua Status' },
+  { code: 'Active', label: '● Active' },
+  { code: 'Upcoming', label: '● Upcoming' },
+  { code: 'Expired', label: '● Expired' },
+];
+---
+
+<Layout
+  title="News – ITPLN COMBAT"
+  description="Kabar terbaru, agenda kegiatan, jadwal latihan, dan dokumentasi prestasi UKM Bela Diri ITPLN COMBAT."
+>
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <h2>Kabar &amp; Berita</h2>
+          <p class="sub">
+            Informasi resmi seputar kegiatan, agenda latihan di Loby Depan, dan prestasi atlet ITPLN COMBAT.
+          </p>
+        </div>
+      </div>
+
+      <!-- Baris Filter Kategori & Status -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="tabs !mb-0" id="news-tabs" role="group" aria-label="Filter kategori berita">
+          {categories.map((cat, i) => (
+            <button
+              type="button"
+              class={i === 0 ? 'active' : ''}
+              data-cat={cat}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap" id="news-status-tabs" role="group" aria-label="Filter status masa berlaku">
+          {statusFilters.map((sf, i) => (
+            <button
+              type="button"
+              data-status-filter={sf.code}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              class={`px-3 py-1.5 text-xs font-condensed font-bold uppercase tracking-wider border transition-colors cursor-pointer ${
+                i === 0
+                  ? 'bg-combat-red border-combat-red text-white'
+                  : 'bg-panel border-line text-mute hover:border-combat-red hover:text-white'
+              }`}
+            >
+              {sf.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Empty State Koleksi Kosong -->
+      <div
+        id="news-collection-empty"
+        class={`bg-panel border border-line p-12 text-center my-6 ${newsItems.length === 0 ? 'block' : 'hidden'}`}
+      >
+        <h3 class="text-2xl mb-2">Belum Ada Berita</h3>
+        <p class="text-mute max-w-md mx-auto">
+          Informasi kegiatan, agenda, dan kabar terbaru UKM ITPLN COMBAT akan segera hadir di sini.
+        </p>
+      </div>
+
+      <!-- Grid Kartu Berita -->
+      <div class={`grid ${newsItems.length === 0 ? 'hidden' : ''}`} id="news-grid">
+        {newsItems.map((item, i) => (
+          <div
+            class="card rev news-card-trigger cursor-pointer"
+            tabindex="0"
+            role="button"
+            aria-label={`Buka berita: ${item.title}`}
+            data-news-item
+            data-judul={item.title}
+            data-slug={item.slug}
+            data-kategori={item.category}
+            data-author={item.author}
+            data-ringkasan={item.description}
+            data-konten={item.body}
+            data-foto={item.featuredImage}
+            data-mulai={item.startDate}
+            data-selesai={item.endDate}
+            data-status={item.computedStatus}
+            data-color={String(i + 1)}
+          >
+            <div class="ph" style="background: #111;">
+              {item.featuredImage ? (
+                <img
+                  src={item.featuredImage}
+                  alt={item.imageAlt}
+                  loading="lazy"
+                  decoding="async"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                />
+              ) : null}
+              <span style={item.featuredImage ? 'display: none;' : ''}>ITPLN</span>
+            </div>
+
+            <div class="body">
+              <div class="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                <div class="cat">{item.category}</div>
+                <span class={`news-status-badge ${item.badge.cssClass}`} data-card-status-badge>
+                  {item.badge.dotLabel}
+                </span>
+              </div>
+
+              <h3>{item.title}</h3>
+              <p class="line-clamp-3">{item.description}</p>
+
+              <div class="mt-4 pt-3 border-t border-line flex flex-col gap-1.5 text-xs">
+                <div class="flex items-center justify-between text-mute">
+                  <span>Mulai: {item.formattedPublishShort}</span>
+                  <span>{item.endDate ? `Berakhir: ${item.endDate.slice(0, 10)}` : ''}</span>
+                </div>
+
+                <div
+                  data-expired-note
+                  class={`text-[11px] text-[#ff6b6b] font-medium ${
+                    item.computedStatus === 'Expired' ? 'block' : 'hidden'
+                  }`}
+                >
+                  ⚠️ Masa berlaku telah berakhir
+                </div>
+
+                <div class="flex items-center justify-between mt-1.5 pt-1.5 border-t border-line/50">
+                  <span class="text-mute truncate max-w-[140px]" title={item.author}>
+                    {item.author}
+                  </span>
+                  <a
+                    href={`/news/${item.slug}`}
+                    data-direct-link
+                    class="text-combat-red2 hover:text-white font-bold uppercase tracking-wider no-underline transition-colors"
+                  >
+                    Halaman Detail →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Empty State saat Filter Tidak Menemukan Berita -->
+      <div id="news-filter-empty" class="hidden bg-panel border border-line p-10 text-center my-6">
+        <h3 class="text-2xl mb-2">Tidak Ada Berita pada Filter Ini</h3>
+        <p class="text-mute mb-4">
+          Coba pilih kategori atau status berita yang lain untuk melihat daftar artikel.
+        </p>
+        <button type="button" id="news-reset-filter" class="btn ghost text-sm px-5 py-2">
+          Reset Filter
+        </button>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div
+        id="news-pagination"
+        class="mt-10 hidden items-center justify-between flex-wrap gap-4 border-t border-line pt-6"
+      >
+        <div class="text-sm text-mute" id="news-page-info">Menampilkan berita</div>
+        <div class="flex items-center gap-2" id="news-page-buttons"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Band CTA -->
+  <div class="band rev">
+    <h2>Ingin berprestasi bersama ITPLN COMBAT?</h2>
+    <br />
+    <a class="btn" href={settings.link_form_daftar} target="_blank" rel="noopener noreferrer">
+      Daftar Anggota Sekarang
+    </a>
+  </div>
+
+  <!-- Modal Detail Berita -->
+  <NewsModal />
+</Layout>
+
+<script is:inline>
+  (async function initNewsPage() {
+    const ITEMS_PER_PAGE = 6;
+    let currentCategory = 'Semua';
+    let currentStatusFilter = 'Semua';
+    let currentPage = 1;
+
+    const grid = document.getElementById('news-grid');
+    const colEmpty = document.getElementById('news-collection-empty');
+    const catButtons = document.querySelectorAll('#news-tabs button');
+    const statusButtons = document.querySelectorAll('#news-status-tabs button');
+    const emptyBox = document.getElementById('news-filter-empty');
+    const resetBtn = document.getElementById('news-reset-filter');
+    const paginationWrap = document.getElementById('news-pagination');
+    const pageInfo = document.getElementById('news-page-info');
+    const pageBtns = document.getElementById('news-page-buttons');
+
+    function parseWIB(raw, isEnd) {
+      if (!raw) return null;
+      const s = String(raw).trim();
+      if (!s) return null;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        return Date.parse(s + (isEnd ? 'T23:59:59.999+07:00' : 'T00:00:00.000+07:00'));
+      }
+      const norm = s.replace(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/, '$1T$2');
+      const hasTz = /([Zz]|[+-]\d{2}:?\d{2})$/.test(norm);
+      const ms = Date.parse(hasTz ? norm : norm + '+07:00');
+      return Number.isNaN(ms) ? null : ms;
+    }
+
+    function evalStatus(startStr, endStr) {
+      const now = Date.now();
+      const sMs = parseWIB(startStr, false);
+      const eMs = parseWIB(endStr, true);
+      if (sMs !== null && now < sMs) return { code: 'Upcoming', label: '● UPCOMING', cls: 'status-scheduled' };
+      if (eMs !== null && now > eMs) return { code: 'Expired', label: '● EXPIRED', cls: 'status-expired' };
+      return { code: 'Active', label: '● ACTIVE', cls: 'status-active' };
+    }
+
+    // Jika static grid kosong, muat berita dinamis dari /api/admin/content atau localStorage
+    if (grid && grid.children.length === 0) {
+      let dynamicNews = [];
+      try {
+        const res = await fetch('/api/admin/content');
+        if (res.ok) {
+          const j = await res.json();
+          if (j.success && j.data?.news) dynamicNews = j.data.news;
+        }
+      } catch {}
+
+      if (!dynamicNews.length) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('itpln_combat_dynamic_content') || '{}');
+          if (Array.isArray(saved.news)) dynamicNews = saved.news;
+        } catch {}
+      }
+
+      const pubNews = dynamicNews.filter((n) => String(n.status || 'Published').toLowerCase() !== 'draft');
+      if (pubNews.length > 0) {
+        colEmpty?.classList.add('hidden');
+        grid.classList.remove('hidden');
+        const safe = (v) => String(v || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        grid.innerHTML = pubNews
+          .map((item, i) => {
+            const st = evalStatus(item.startDate, item.endDate);
+            return `
+              <div class="card rev in news-card-trigger cursor-pointer" tabindex="0" role="button" data-news-item
+                data-judul="${safe(item.title)}" data-slug="${safe(item.slug)}" data-kategori="${safe(item.category)}"
+                data-author="${safe(item.author)}" data-ringkasan="${safe(item.description)}" data-konten="${safe(item.body || item.description)}"
+                data-foto="${safe(item.featuredImage)}" data-mulai="${safe(item.startDate)}" data-selesai="${safe(item.endDate)}"
+                data-status="${st.code}" data-color="${i + 1}">
+                <div class="ph" style="background:#111;">
+                  <img src="${safe(item.featuredImage)}" alt="${safe(item.imageAlt || item.title)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                  <span style="display:none;">ITPLN</span>
+                </div>
+                <div class="body">
+                  <div class="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                    <div class="cat">${safe(item.category)}</div>
+                    <span class="news-status-badge ${st.cls}" data-card-status-badge>${st.label}</span>
+                  </div>
+                  <h3>${safe(item.title)}</h3>
+                  <p class="line-clamp-3">${safe(item.description)}</p>
+                  <div class="mt-4 pt-3 border-t border-line flex flex-col gap-1.5 text-xs">
+                    <div data-expired-note class="text-[11px] text-[#ff6b6b] font-medium ${st.code === 'Expired' ? 'block' : 'hidden'}">
+                      ⚠️ Masa berlaku telah berakhir
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                      <span class="text-mute">${safe(item.author)}</span>
+                      <span class="text-combat-red2 font-bold uppercase tracking-wider">Baca Detail →</span>
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+          })
+          .join('');
+      }
+    }
+
+    const cards = Array.from(document.querySelectorAll('[data-news-item]'));
+
+    // Evaluasi status real-time Asia/Jakarta pada seluruh kartu
+    cards.forEach((card) => {
+      const st = evalStatus(card.dataset.mulai, card.dataset.selesai);
+      card.dataset.status = st.code;
+      const badge = card.querySelector('[data-card-status-badge]');
+      if (badge) {
+        badge.textContent = st.label;
+        badge.className = 'news-status-badge ' + st.cls;
+      }
+      const expNote = card.querySelector('[data-expired-note]');
+      if (expNote) {
+        expNote.classList.toggle('hidden', st.code !== 'Expired');
+        expNote.classList.toggle('block', st.code === 'Expired');
+      }
+    });
+
+    function renderList() {
+      if (cards.length === 0) return;
+      const filtered = cards.filter((card) => {
+        const matchCat = currentCategory === 'Semua' || card.dataset.kategori === currentCategory;
+        const matchStatus = currentStatusFilter === 'Semua' || card.dataset.status === currentStatusFilter;
+        return matchCat && matchStatus;
+      });
+
+      const totalItems = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIdx = startIdx + ITEMS_PER_PAGE;
+      const visibleSet = new Set(filtered.slice(startIdx, endIdx));
+
+      cards.forEach((card) => {
+        card.style.display = visibleSet.has(card) ? 'flex' : 'none';
+      });
+
+      if (emptyBox) emptyBox.classList.toggle('hidden', totalItems > 0);
+      if (paginationWrap) {
+        paginationWrap.classList.toggle('hidden', totalItems === 0);
+        paginationWrap.classList.toggle('flex', totalItems > 0);
+      }
+
+      if (pageInfo && totalItems > 0) {
+        pageInfo.textContent = `Menampilkan ${startIdx + 1}–${Math.min(endIdx, totalItems)} dari ${totalItems} berita`;
+      }
+
+      if (pageBtns) {
+        pageBtns.innerHTML = '';
+        if (totalPages > 1) {
+          for (let p = 1; p <= totalPages; p++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = String(p);
+            btn.className =
+              p === currentPage
+                ? 'px-3.5 py-1.5 font-condensed font-bold bg-combat-red border border-combat-red text-white cursor-pointer'
+                : 'px-3.5 py-1.5 font-condensed font-bold bg-panel border border-line text-white hover:border-combat-red cursor-pointer';
+            btn.addEventListener('click', () => {
+              currentPage = p;
+              renderList();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            pageBtns.appendChild(btn);
+          }
+        }
+      }
+    }
+
+    catButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        catButtons.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        currentCategory = btn.dataset.cat || 'Semua';
+        currentPage = 1;
+        renderList();
+      });
+    });
+
+    statusButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        statusButtons.forEach((b) => {
+          b.setAttribute('aria-pressed', 'false');
+          b.className =
+            'px-3 py-1.5 text-xs font-condensed font-bold uppercase tracking-wider border transition-colors cursor-pointer bg-panel border-line text-mute hover:border-combat-red hover:text-white';
+        });
+        btn.setAttribute('aria-pressed', 'true');
+        btn.className =
+          'px-3 py-1.5 text-xs font-condensed font-bold uppercase tracking-wider border transition-colors cursor-pointer bg-combat-red border-combat-red text-white';
+        currentStatusFilter = btn.dataset.statusFilter || 'Semua';
+        currentPage = 1;
+        renderList();
+      });
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (catButtons[0]) catButtons[0].click();
+        if (statusButtons[0]) statusButtons[0].click();
+      });
+    }
+
+    renderList();
+  })();
+</script>

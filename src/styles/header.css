@@ -1,0 +1,197 @@
+header {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  transition: height 0.25s ease;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  height: 72px;
+  transition: height 0.25s ease;
+}
+
+header.sm .bar {
+  height: 54px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font: 400 22px Anton, sans-serif;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.brand img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  transition: width 0.25s ease, height 0.25s ease;
+}
+
+header.sm .brand img {
+  width: 36px;
+  height: 36px;
+}
+
+nav {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  align-items: stretch;
+  height: 100%;
+}
+
+nav > a,
+nav > .dd > button {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 16px;
+  font: 700 17px "Barlow Condensed", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+
+nav > a::after,
+nav > .dd > button::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 3px;
+  background: var(--red);
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+}
+
+nav > a:hover::after,
+nav > a[aria-current="page"]::after,
+.dd:hover > button::after,
+.dd.open > button::after {
+  transform: scaleX(1);
+}
+
+.dd {
+  position: relative;
+  height: 100%;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  min-width: 260px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--red);
+  padding: 8px;
+  display: none;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+  z-index: 55;
+}
+
+.dd:hover .menu,
+.dd.open .menu {
+  display: block;
+}
+
+.menu a {
+  display: block;
+  padding: 12px 14px;
+  text-decoration: none;
+  font-weight: 700;
+  color: var(--ink);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.menu a small {
+  display: block;
+  color: var(--mute);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.menu a:hover,
+.menu a:focus-visible {
+  background: #1a1a1d;
+  color: var(--red2);
+}
+
+.burger {
+  display: none;
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--line);
+  color: #fff;
+  padding: 8px 12px;
+  font: 700 14px Barlow, sans-serif;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+@media (max-width: 860px) {
+  .burger {
+    display: block;
+  }
+
+  nav {
+    position: fixed;
+    inset: calc(54px + env(safe-area-inset-top, 0px)) 0 auto 0;
+    background: #000;
+    flex-direction: column;
+    height: auto;
+    padding: 8px 0 16px;
+    border-bottom: 3px solid var(--red);
+    display: none;
+    margin: 0;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+
+  nav.open {
+    display: flex;
+  }
+
+  nav > a,
+  nav > .dd > button {
+    height: 52px;
+    padding: 0 24px;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .dd {
+    height: auto;
+  }
+
+  .menu {
+    position: static;
+    display: block;
+    border: 0;
+    background: #0a0a0a;
+    margin: 0 24px;
+    box-shadow: none;
+  }
+
+  .bar {
+    height: 60px;
+  }
+}

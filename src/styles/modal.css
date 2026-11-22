@@ -1,0 +1,232 @@
+/* News Detail Modal */
+.news-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.news-modal-overlay.active,
+.news-modal-overlay.on {
+  display: flex !important;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.news-modal-overlay.hidden {
+  display: none !important;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.news-modal-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--red);
+  max-width: 760px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 4px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+  position: relative;
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.news-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 42px;
+  height: 42px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid var(--line);
+  color: #fff;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+  border-radius: 4px;
+  pointer-events: auto;
+}
+
+.news-modal-close:hover,
+.news-modal-close:focus-visible {
+  background: var(--red);
+  border-color: var(--red);
+  transform: scale(1.05);
+}
+
+.news-modal-close:active {
+  transform: scale(0.95);
+}
+
+.news-modal-header {
+  position: relative;
+}
+
+.news-modal-header .ph {
+  aspect-ratio: 16 / 9;
+  max-height: 320px;
+}
+
+.news-modal-body {
+  padding: 28px 32px 36px;
+}
+
+.news-modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  font: 700 13px "Barlow Condensed", sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+
+.news-modal-meta .cat {
+  background: rgba(224, 22, 29, 0.15);
+  color: var(--red2);
+  padding: 3px 10px;
+  border-radius: 2px;
+  border: 1px solid rgba(224, 22, 29, 0.3);
+}
+
+.news-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.news-status-badge.status-active {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.35);
+}
+
+.news-status-badge.status-scheduled {
+  background: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+  border: 1px solid rgba(241, 196, 15, 0.35);
+}
+
+.news-status-badge.status-expired {
+  background: rgba(231, 76, 60, 0.18);
+  color: #ff6b6b;
+  border: 1px solid rgba(231, 76, 60, 0.45);
+}
+
+.news-status-badge.status-draft {
+  background: rgba(149, 165, 166, 0.18);
+  color: #a7a7ad;
+  border: 1px solid rgba(149, 165, 166, 0.4);
+}
+
+/* Kotak Informasi Durasi */
+.news-duration-box {
+  background: #141418;
+  border-left: 3px solid var(--red);
+  padding: 12px 16px;
+  margin-bottom: 22px;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.duration-row {
+  display: flex;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.duration-label {
+  color: var(--mute);
+  font-weight: 500;
+  min-width: 110px;
+}
+
+.duration-val {
+  color: #fff;
+  font-weight: 600;
+}
+
+.news-modal-title {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.1;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.news-modal-text {
+  color: #d6d6dc;
+  font-size: 17px;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.news-modal-text p {
+  margin-bottom: 16px;
+}
+
+.news-modal-footer {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 600px) {
+  .news-modal-overlay {
+    padding: 12px;
+  }
+  .news-modal-body {
+    padding: 20px;
+  }
+  .duration-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+}

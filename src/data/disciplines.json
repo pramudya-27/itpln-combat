@@ -1,0 +1,88 @@
+{
+  "items": [
+    {
+      "nama": "Muay Thai",
+      "slug": "muay-thai",
+      "deskripsi": "Seni delapan anggota tubuh. Kombinasi eksplosif pukulan, tendangan, siku, lutut, dan teknik clinch jarak dekat.",
+      "deskripsi_lengkap": "Cabang latihan Muay Thai ITPLN COMBAT memfokuskan latihan pada penguasaan 'The Art of Eight Limbs' (Seni Delapan Tungkai). Mahasiswa dilatih mulai dari sikap kuda-kuda dasar (stance), keseimbangan gerak kaki, kombinasi pukulan dan tendangan roundhouse (teep & sok), hingga penguasaan pertarungan jarak dekat (clinching) dan serangan lutut. Materi latihan dirancang bertahap untuk pemula maupun anggota yang ingin mendalami teknik striking penuh.",
+      "foto": "/uploads/divisions/muay-thai.jpg",
+      "alt": "Pertandingan Muay Thai dengan aksi tendangan tinggi di atas ring",
+      "jadwal_latihan": "Rabu & Sabtu | 19:00 - 21:00 WIB | Loby Depan Kampus ITPLN",
+      "fokus_teknik": [
+        "Fundamental Stance, Balance & Footwork Muay Thai",
+        "Kombinasi Striking 8 Tungkai (Punch, Kick, Knee, Elbow)",
+        "Teknik Clinch Control, Neck Wrestling & Sweep",
+        "Padwork, Heavy Bag Conditioning & Technical Sparring"
+      ],
+      "perlengkapan": [
+        "Handwrap (Pelindung pergelangan tangan & buku jari)",
+        "Sarung Tinju (Boxing/Muay Thai Gloves 12oz - 16oz)",
+        "Shin Guard (Pelindung tulang kering) & Mouthguard",
+        "Pakaian olahraga yang nyaman dan mendukung mobilitas"
+      ]
+    },
+    {
+      "nama": "Boxing",
+      "slug": "boxing",
+      "deskripsi": "Ketajaman footwork, head movement, jab, dan kombinasi pukulan presisi. Fondasi utama dari seluruh seni striking.",
+      "deskripsi_lengkap": "Cabang latihan Boxing ITPLN COMBAT menempa ketangkasan, akurasi pukulan, refleks pertahanan kepala (head movement), dan kelincahan gerak kaki (footwork). Latihan mencakup penguasaan pukulan dasar (jab, cross, hook, uppercut), teknik bertahan (slip, roll, parry, high guard), serta strategi mengatur jarak dan ritme. Sangat ideal untuk membangun kebugaran kardiovaskular, fokus mental, dan kecepatan reaksi.",
+      "foto": "/uploads/divisions/boxing.jpg",
+      "alt": "Sarung tinju resmi divisi Boxing ITPLN COMBAT di atas kanvas ring",
+      "jadwal_latihan": "Rabu & Sabtu | 19:00 - 21:00 WIB | Loby Depan Kampus ITPLN",
+      "fokus_teknik": [
+        "Orthodox & Southpaw Stance serta Dynamic Footwork",
+        "Kombinasi Pukulan Presisi (Jab, Cross, Hook, Uppercut)",
+        "Defensive Evasion (Slip, Bob & Weave, Parry, Counter-Punch)",
+        "Focus Mitt Drilling, Shadow Boxing & Ring Generalship"
+      ],
+      "perlengkapan": [
+        "Handwrap 4.5 meter",
+        "Boxing Gloves standar latihan/sparring",
+        "Mouthguard (Pelindung gigi) & Headguard saat sparring",
+        "Sepatu olahraga beralas datar atau sepatu boxing"
+      ]
+    },
+    {
+      "nama": "Tarung Derajat",
+      "slug": "tarung-derajat",
+      "deskripsi": "Seni bela diri praktis dan reaksi cepat asli Indonesia. Menggabungkan daya gerak pukulan, tendangan, tangkisan, dan bantingan.",
+      "deskripsi_lengkap": "Tarung Derajat (AA Boxer) adalah seni bela diri praktis full-contact asli Indonesia yang menjunjung tinggi semboyan 'Aku Ramah Bukan Berarti Takut, Aku Tunduk Bukan Berarti Takluk'. Pada cabang latihan Tarung Derajat di ITPLN COMBAT, anggota melatih lima unsur daya gerak moral dan fisik: kekuatan, kecepatan, ketepatan, keberanian, dan keuletan. Materi meliputi teknik pukulan cepat, tendangan eksplosif, tangkisan dua arah, serta bantingan praktis untuk pertahanan diri maupun kompetisi.",
+      "foto": "/uploads/divisions/tarung-derajat.jpg",
+      "alt": "Atlet Tarung Derajat melakukan aksi tendangan melompat dengan seragam kurung resmi",
+      "jadwal_latihan": "Rabu & Sabtu | 19:00 - 21:00 WIB | Loby Depan Kampus ITPLN",
+      "fokus_teknik": [
+        "Lima Unsur Daya Gerak (Kekuatan, Kecepatan, Ketepatan, Keberanian, Keuletan)",
+        "Jurus Derajat Dasar, Pukulan Lingkar & Tendangan Reaksi Cepat",
+        "Teknik Tangkisan, Sapuan Kaki & Bantingan Praktis",
+        "Seni Pertahanan Diri Taktis (Self-Defense) & Tarung Bebas"
+      ],
+      "perlengkapan": [
+        "Seragam latihan Tarung Derajat (Kurung) atau pakaian olahraga",
+        "Sabuk tingkatan (Kurata) bagi anggota yang telah menempuh ujian",
+        "Pelindung tubuh (Body Protector) & Pelindung kepala saat sesi tarung",
+        "Botol air minum pribadi"
+      ]
+    },
+    {
+      "nama": "MMA",
+      "slug": "mma",
+      "deskripsi": "Integrasi bela diri modern yang menyatukan striking berdiri, bantingan wrestling, dan kuncian grappling di matras.",
+      "deskripsi_lengkap": "Cabang latihan Mixed Martial Arts (MMA) ITPLN COMBAT memadukan efektivitas pertarungan berdiri (stand-up striking) dengan penguasaan pertarungan bawah (wrestling & ground grappling). Anggota mempelajari cara melakukan transisi mulus dari kombinasi pukulan-tendangan menuju takedown, mempertahankan diri dari bantingan (sprawl & takedown defense), mengontrol posisi di atas matras (guard, mount, side control), hingga teknik kuncian (submission).",
+      "foto": "/uploads/divisions/mma.jpg",
+      "alt": "Pertarungan Mixed Martial Arts MMA dengan teknik grappling di dalam arena",
+      "jadwal_latihan": "Rabu & Sabtu | 19:00 - 21:00 WIB | Loby Depan Kampus ITPLN",
+      "fokus_teknik": [
+        "Stand-Up Striking to Takedown Transition",
+        "Freestyle Wrestling Takedowns (Single Leg, Double Leg) & Sprawl Defense",
+        "Ground Control, Positional Dominance & Escape",
+        "Submission Grappling (Chokes, Joint Locks) & Submission Defense"
+      ],
+      "perlengkapan": [
+        "Rashguard atau kaos latihan ketat tanpa kancing/resleting",
+        "Celana pendek bela diri (Boardshorts / Fight Shorts)",
+        "MMA Sparring Gloves (7oz padded) & Shin Guard",
+        "Mouthguard & Handwrap"
+      ]
+    }
+  ]
+}

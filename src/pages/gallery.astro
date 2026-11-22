@@ -1,0 +1,221 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { getAllGallery } from '../lib/content.js';
+
+// Ambil foto galeri yang dipublikasikan (status === 'Published') dari Astro Content Collection
+const galleryItems = await getAllGallery({ includeDrafts: false });
+
+const categories = [
+  'Semua',
+  'Muay Thai',
+  'Boxing',
+  'Tarung Derajat',
+  'MMA',
+  'Training',
+  'Competition',
+  'Events',
+];
+---
+
+<Layout
+  title="Gallery – ITPLN COMBAT"
+  description="Dokumentasi foto sesi latihan Muay Thai, Boxing, Tarung Derajat, MMA, kejuaraan antarkampus, dan kegiatan UKM ITPLN COMBAT."
+>
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <h2>Gallery</h2>
+          <p class="sub">
+            Dokumentasi momen latihan, pertandingan, dan kegiatan resmi UKM ITPLN COMBAT.
+          </p>
+        </div>
+        <div class="text-sm text-mute font-condensed uppercase tracking-wider" id="gallery-count-label">
+          Total: <strong class="text-white">{galleryItems.length}</strong> Foto
+        </div>
+      </div>
+
+      <!-- Tabs Filter Kategori -->
+      <div class="tabs" id="gallery-tabs" role="group" aria-label="Filter kategori foto">
+        {categories.map((cat, i) => (
+          <button
+            type="button"
+            class={i === 0 ? 'active' : ''}
+            data-cat={cat}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <!-- Empty State saat Koleksi Galeri Kosong -->
+      <div
+        id="gallery-collection-empty"
+        class={`bg-panel border border-line p-12 text-center my-6 ${galleryItems.length === 0 ? 'block' : 'hidden'}`}
+      >
+        <h3 class="text-2xl mb-2">Belum Ada Dokumentasi</h3>
+        <p class="text-mute max-w-md mx-auto">
+          Foto dokumentasi latihan, pertandingan, dan kegiatan UKM ITPLN COMBAT akan segera ditampilkan di sini.
+        </p>
+      </div>
+
+      <!-- Grid Galeri Foto -->
+      <div class={`grid ${galleryItems.length === 0 ? 'hidden' : ''}`} id="gallery-grid">
+        {galleryItems.map((item, i) => (
+          <div
+            class="card rev gallery-card-trigger cursor-pointer"
+            tabindex="0"
+            role="button"
+            aria-label={`Buka foto: ${item.title}`}
+            data-judul={item.title}
+            data-kategori={item.category}
+            data-tanggal={item.date}
+            data-deskripsi={item.description}
+            data-foto={item.image}
+            data-alt={item.alt}
+            data-color={String(i)}
+          >
+            <div class="ph" style="background: #111;">
+              {item.image ? (
+                <img
+                  src={item.image}
+                  alt={item.alt}
+                  loading="lazy"
+                  decoding="async"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                />
+              ) : null}
+              <span style={item.image ? 'display: none;' : ''}>ITPLN</span>
+
+              {item.featured && (
+                <div class="absolute top-3 left-3 bg-combat-red text-white font-condensed font-bold uppercase text-[11px] tracking-wider px-2.5 py-0.5 shadow">
+                  ★ Featured
+                </div>
+              )}
+            </div>
+
+            <div class="body">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <div class="cat">{item.category}</div>
+                <span class="text-xs text-mute">{item.formattedDate}</span>
+              </div>
+              <h3>{item.title}</h3>
+              <p class="line-clamp-2">{item.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Empty State saat Filter Kategori Tidak Memiliki Foto -->
+      <div id="gallery-filter-empty" class="hidden bg-panel border border-line p-10 text-center my-6">
+        <h3 class="text-2xl mb-2">Belum Ada Foto pada Kategori Ini</h3>
+        <p class="text-mute mb-4">
+          Pilih kategori lainnya atau tampilkan semua dokumentasi foto kegiatan.
+        </p>
+        <button type="button" id="gallery-reset-btn" class="btn ghost text-sm px-5 py-2">
+          Tampilkan Semua Foto
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox Gallery Modal -->
+  <Lightbox />
+</Layout>
+
+<script is:inline>
+  (async function initGalleryPage() {
+    const grid = document.getElementById('gallery-grid');
+    const colEmpty = document.getElementById('gallery-collection-empty');
+    const gTabs = document.querySelectorAll('#gallery-tabs button');
+    const gEmpty = document.getElementById('gallery-filter-empty');
+    const gReset = document.getElementById('gallery-reset-btn');
+    const gCountLabel = document.getElementById('gallery-count-label');
+
+    // Jika static grid kosong, muat foto dinamis dari /api/admin/content atau localStorage
+    if (grid && grid.children.length === 0) {
+      let dynamicGallery = [];
+      try {
+        const res = await fetch('/api/admin/content');
+        if (res.ok) {
+          const j = await res.json();
+          if (j.success && j.data?.gallery) dynamicGallery = j.data.gallery;
+        }
+      } catch {}
+
+      if (!dynamicGallery.length) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('itpln_combat_dynamic_content') || '{}');
+          if (Array.isArray(saved.gallery)) dynamicGallery = saved.gallery;
+        } catch {}
+      }
+
+      const pubGallery = dynamicGallery.filter((g) => String(g.status || 'Published').toLowerCase() !== 'draft');
+      if (pubGallery.length > 0) {
+        colEmpty?.classList.add('hidden');
+        grid.classList.remove('hidden');
+        const safe = (v) => String(v || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        grid.innerHTML = pubGallery
+          .map(
+            (item, i) => `
+            <div class="card rev in gallery-card-trigger cursor-pointer" tabindex="0" role="button"
+              data-judul="${safe(item.title)}" data-kategori="${safe(item.category)}" data-tanggal="${safe(item.date)}"
+              data-deskripsi="${safe(item.description)}" data-foto="${safe(item.image)}" data-alt="${safe(item.alt || item.title)}" data-color="${i}">
+              <div class="ph" style="background:#111;">
+                <img src="${safe(item.image)}" alt="${safe(item.alt || item.title)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                <span style="display:none;">ITPLN</span>
+                ${item.featured ? '<div class="absolute top-3 left-3 bg-combat-red text-white font-condensed font-bold uppercase text-[11px] tracking-wider px-2.5 py-0.5 shadow">★ Featured</div>' : ''}
+              </div>
+              <div class="body">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <div class="cat">${safe(item.category)}</div>
+                  <span class="text-xs text-mute">${safe(item.date)}</span>
+                </div>
+                <h3>${safe(item.title)}</h3>
+                <p class="line-clamp-2">${safe(item.description)}</p>
+              </div>
+            </div>`
+          )
+          .join('');
+      }
+    }
+
+    const gCards = Array.from(document.querySelectorAll('#gallery-grid .gallery-card-trigger'));
+    if (gCountLabel) {
+      gCountLabel.innerHTML = `Total: <strong class="text-white">${gCards.length}</strong> Foto`;
+    }
+
+    function filterGallery(selectedCat) {
+      if (gCards.length === 0) return;
+      let visibleCount = 0;
+      gCards.forEach((card) => {
+        const match = selectedCat === 'Semua' || card.dataset.kategori === selectedCat;
+        card.style.display = match ? 'flex' : 'none';
+        if (match) visibleCount++;
+      });
+
+      if (gEmpty) gEmpty.classList.toggle('hidden', visibleCount > 0);
+      if (gCountLabel) {
+        gCountLabel.innerHTML = `Menampilkan: <strong class="text-white">${visibleCount}</strong> Foto`;
+      }
+    }
+
+    gTabs.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        gTabs.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        filterGallery(btn.dataset.cat || 'Semua');
+      });
+    });
+
+    if (gReset && gTabs[0]) {
+      gReset.addEventListener('click', () => gTabs[0].click());
+    }
+  })();
+</script>

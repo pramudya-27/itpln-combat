@@ -1,0 +1,31 @@
+/* Red Callout Band */
+.band {
+  position: relative;
+  overflow: hidden;
+  background: var(--red);
+  padding: 64px 24px;
+  text-align: center;
+  color: #fff;
+}
+
+.band h2 {
+  display: inline-block;
+  margin-bottom: 22px;
+}
+
+.band h2::after {
+  background: #000;
+  margin: 12px auto 0;
+}
+
+.band .btn {
+  background: #000;
+  border-color: #000;
+  color: #fff;
+}
+
+.band .btn:hover {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}

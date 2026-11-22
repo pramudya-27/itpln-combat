@@ -1,0 +1,42 @@
+/* Visi/Misi & Table Layouts */
+.two {
+  display: grid;
+  gap: 36px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.two h3 {
+  font-size: 30px;
+  margin-bottom: 10px;
+  color: var(--red2);
+}
+
+.scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+}
+
+td, th {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+th {
+  background: var(--red);
+  color: #fff;
+  font: 700 16px "Barlow Condensed", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+td {
+  color: #e2e2e6;
+  font-size: 15px;
+}

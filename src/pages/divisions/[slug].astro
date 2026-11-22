@@ -1,0 +1,217 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import disciplinesData from '../../data/disciplines.json';
+import { getAllGallery } from '../../lib/content.js';
+
+export function getStaticPaths() {
+  const items = disciplinesData.items || [];
+  return items.map((disc, idx) => {
+    const slug =
+      disc.slug ||
+      String(disc.nama || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    return {
+      params: { slug },
+      props: {
+        branch: { ...disc, slug, index: idx + 1 },
+        allBranches: items.map((d) => ({
+          ...d,
+          slug:
+            d.slug ||
+            String(d.nama || '')
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, ''),
+        })),
+      },
+    };
+  });
+}
+
+const { branch, allBranches } = Astro.props;
+const allGallery = await getAllGallery({ includeDrafts: false });
+
+const relatedGallery = allGallery
+  .filter(
+    (g) =>
+      g.category.toLowerCase() === branch.nama.toLowerCase() ||
+      g.category === 'Training'
+  )
+  .slice(0, 3);
+---
+
+<Layout
+  title={`${branch.nama} – Cabang Latihan ITPLN COMBAT`}
+  description={branch.deskripsi}
+>
+  <!-- Hero Detail Cabang Latihan (Penjelasan Detail & Spesifik) -->
+  <section class="relative overflow-hidden border-b border-line pt-12 pb-16">
+    <div class="wrap">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" class="mb-6 flex items-center gap-2 text-sm text-mute">
+        <a href="/" class="hover:text-white transition-colors">Home</a>
+        <span>/</span>
+        <a href="/#divisions" class="hover:text-white transition-colors">Cabang Latihan</a>
+        <span>/</span>
+        <span class="text-combat-red2 font-semibold">{branch.nama}</span>
+      </nav>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <!-- Kolom Kiri: Penjelasan Detail Cabang Latihan -->
+        <div class="lg:col-span-7">
+          <div class="inline-block bg-combat-red/15 border border-combat-red/40 text-combat-red2 font-condensed font-bold uppercase tracking-widest text-xs px-3 py-1 mb-4">
+            CABANG LATIHAN BELA DIRI • ITPLN COMBAT
+          </div>
+          <h1 class="text-5xl md:text-7xl tracking-tight mb-5">
+            {branch.nama}
+          </h1>
+          <p class="text-lg md:text-xl text-gray-200 leading-relaxed mb-6">
+            {branch.deskripsi}
+          </p>
+          <p class="text-mute leading-relaxed mb-8">
+            {branch.deskripsi_lengkap || branch.deskripsi}
+          </p>
+
+          <div class="flex flex-wrap gap-4">
+            <a class="btn ghost" href="/#divisions">
+              ← Kembali ke Cabang Latihan
+            </a>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Foto Cabang Latihan -->
+        <div class="lg:col-span-5">
+          <div class="relative aspect-[4/3] bg-panel border-2 border-line overflow-hidden shadow-2xl group">
+            {branch.foto ? (
+              <img
+                src={branch.foto}
+                alt={branch.alt || `Cabang latihan ${branch.nama} ITPLN COMBAT`}
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="eager"
+                decoding="async"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+              />
+            ) : null}
+            <div
+              class="ph w-full h-full"
+              style={`display: ${branch.foto ? 'none' : 'grid'}; background: linear-gradient(135deg, #8f0c12, #000);`}
+            >
+              <span>{branch.nama}</span>
+            </div>
+            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4">
+              <span class="font-condensed font-bold uppercase tracking-wider text-xs text-combat-red2">
+                📍 Latihan Rutin: Rabu &amp; Sabtu (19:00 – 21:00 WIB) • Loby Depan
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Materi Teknik & Perlengkapan -->
+  <section>
+    <div class="wrap">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Fokus Teknik -->
+        <div class="bg-panel border border-line border-t-4 border-t-combat-red p-7 rev">
+          <span class="font-condensed font-bold uppercase tracking-widest text-xs text-combat-red2">
+            MATERI LATIHAN
+          </span>
+          <h3 class="text-3xl mt-1 mb-5">Fokus Materi &amp; Teknik</h3>
+          <ul class="space-y-3.5 text-gray-300">
+            {(branch.fokus_teknik || []).map((teknik) => (
+              <li class="flex items-start gap-3">
+                <span class="text-combat-red2 font-bold mt-0.5">⚡</span>
+                <span>{teknik}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Perlengkapan Latihan -->
+        <div class="bg-panel border border-line border-t-4 border-t-combat-red p-7 rev">
+          <span class="font-condensed font-bold uppercase tracking-widest text-xs text-combat-red2">
+            STANDAR KESELAMATAN
+          </span>
+          <h3 class="text-3xl mt-1 mb-5">Perlengkapan Latihan</h3>
+          <ul class="space-y-3.5 text-gray-300">
+            {(branch.perlengkapan || []).map((gear) => (
+              <li class="flex items-start gap-3">
+                <span class="text-combat-red2 font-bold mt-0.5">🥊</span>
+                <span>{gear}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dokumentasi Terkait (jika sudah ada foto di Galeri) -->
+  {relatedGallery.length > 0 && (
+    <section class="pt-0">
+      <div class="wrap">
+        <div class="head">
+          <div>
+            <h2>Dokumentasi Latihan</h2>
+            <p class="sub">Potret aktivitas latihan cabang {branch.nama} ITPLN COMBAT.</p>
+          </div>
+          <a href="/gallery" class="btn ghost text-sm px-5 py-2.5">
+            Buka Galeri Lengkap →
+          </a>
+        </div>
+
+        <div class="grid">
+          {relatedGallery.map((item) => (
+            <a href="/gallery" class="card rev no-underline">
+              <div class="ph" style="background: #111;">
+                <img
+                  src={item.image}
+                  alt={item.alt}
+                  loading="lazy"
+                  decoding="async"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+                />
+                <span style="display: none;">ITPLN</span>
+              </div>
+              <div class="body">
+                <div class="cat">{item.category}</div>
+                <h3>{item.title}</h3>
+                <p class="line-clamp-2">{item.description}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Navigasi Antar Cabang Latihan -->
+  <section class="pt-0">
+    <div class="wrap">
+      <h3 class="text-2xl mb-4">Lihat Cabang Latihan Lainnya</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {allBranches.map((d) => {
+          const isCurrent = d.slug === branch.slug;
+          return (
+            <a
+              href={`/divisions/${d.slug}`}
+              class={`p-4 border transition-all no-underline flex items-center justify-between ${
+                isCurrent
+                  ? 'bg-combat-red border-combat-red text-white font-bold'
+                  : 'bg-panel border-line hover:border-combat-red text-gray-200'
+              }`}
+              aria-current={isCurrent ? 'page' : undefined}
+            >
+              <span class="font-anton text-xl uppercase tracking-wide">{d.nama}</span>
+              <span>{isCurrent ? '●' : '→'}</span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</Layout>

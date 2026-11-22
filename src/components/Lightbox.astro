@@ -1,0 +1,224 @@
+---
+import '../styles/lightbox.css';
+---
+
+<div
+  id="gallery-lb"
+  class="lb"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Detail Galeri Foto"
+  style="display: none;"
+>
+  <button id="lb-close" class="lb-close" type="button" aria-label="Tutup lightbox" title="Tutup (Esc)">
+    ✕
+  </button>
+
+  <button id="lb-prev" class="lb-nav lb-prev" type="button" aria-label="Foto sebelumnya" title="Sebelumnya (←)">
+    ‹
+  </button>
+
+  <div class="lb-content" id="lb-content">
+    <div class="lb-pic ph" id="lb-pic">
+      <span id="lb-pic-span">ITPLN</span>
+      <img
+        id="lb-pic-img"
+        alt="Foto Galeri"
+        class="hidden"
+        style="display: none;"
+        onerror="this.style.display='none'; document.getElementById('lb-pic-span').style.display='block';"
+      />
+    </div>
+
+    <div class="lb-caption">
+      <div class="lb-meta">
+        <span class="cat" id="lb-cat">Latihan</span>
+        <span class="date" id="lb-date">Tanggal</span>
+      </div>
+      <h3 id="lb-title">Judul Momen</h3>
+      <p class="lb-desc" id="lb-desc">Deskripsi detail kegiatan...</p>
+    </div>
+  </div>
+
+  <button id="lb-next" class="lb-nav lb-next" type="button" aria-label="Foto berikutnya" title="Berikutnya (→)">
+    ›
+  </button>
+</div>
+
+<script is:inline>
+  const lb = document.getElementById('gallery-lb');
+  const lbClose = document.getElementById('lb-close');
+  const lbPrev = document.getElementById('lb-prev');
+  const lbNext = document.getElementById('lb-next');
+
+  const lbTitle = document.getElementById('lb-title');
+  const lbCat = document.getElementById('lb-cat');
+  const lbDate = document.getElementById('lb-date');
+  const lbDesc = document.getElementById('lb-desc');
+  const lbPic = document.getElementById('lb-pic');
+  const lbPicSpan = document.getElementById('lb-pic-span');
+  const lbPicImg = document.getElementById('lb-pic-img');
+
+  const lbGradients = [
+    'linear-gradient(135deg, #8f0c12, #000)',
+    'linear-gradient(135deg, #1a1a2e, #000)',
+    'linear-gradient(135deg, #5c0a0e, #000)',
+    'linear-gradient(135deg, #2b2b2f, #000)',
+    'linear-gradient(135deg, #b0141b, #000)',
+    'linear-gradient(135deg, #3b0d10, #000)',
+  ];
+
+  let currentGalleryCards = [];
+  let currentIndex = 0;
+  let lastTriggerEl = null;
+
+  function updateLightbox(idx) {
+    if (idx < 0 || idx >= currentGalleryCards.length) return;
+    currentIndex = idx;
+    const card = currentGalleryCards[idx];
+
+    const title = card.dataset.judul || '';
+    const cat = card.dataset.kategori || '';
+    const dateStr = card.dataset.tanggal || '';
+    const desc = card.dataset.deskripsi || '';
+    const foto = card.dataset.foto || '';
+    const colorIdx = parseInt(card.dataset.color || '0', 10);
+
+    if (lbTitle) lbTitle.textContent = title;
+    if (lbCat) lbCat.textContent = cat;
+    if (lbDesc) lbDesc.textContent = desc;
+
+    if (dateStr && lbDate) {
+      try {
+        lbDate.textContent = new Date(dateStr).toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+      } catch {
+        lbDate.textContent = dateStr;
+      }
+    } else if (lbDate) {
+      lbDate.textContent = '';
+    }
+
+    if (foto) {
+      if (lbPicImg) {
+        lbPicImg.src = foto;
+        lbPicImg.style.display = 'block';
+        lbPicImg.classList.remove('hidden');
+      }
+      if (lbPicSpan) {
+        lbPicSpan.style.display = 'none';
+        lbPicSpan.classList.add('hidden');
+      }
+      if (lbPic) lbPic.style.background = '#111';
+    } else {
+      if (lbPicImg) {
+        lbPicImg.removeAttribute('src');
+        lbPicImg.style.display = 'none';
+        lbPicImg.classList.add('hidden');
+      }
+      if (lbPicSpan) {
+        lbPicSpan.style.display = 'block';
+        lbPicSpan.classList.remove('hidden');
+        lbPicSpan.textContent = 'ITPLN';
+      }
+      if (lbPic) lbPic.style.background = lbGradients[colorIdx % lbGradients.length];
+    }
+  }
+
+  function openLightbox(card) {
+    if (!lb) return;
+    lastTriggerEl = card;
+    currentGalleryCards = Array.from(document.querySelectorAll('.gallery-card-trigger:not([style*="display: none"])'));
+    const idx = currentGalleryCards.indexOf(card);
+    currentIndex = idx !== -1 ? idx : 0;
+    updateLightbox(currentIndex);
+
+    lb.classList.add('on');
+    lb.style.display = 'grid';
+    document.body.style.overflow = 'hidden';
+    if (lbClose) lbClose.focus();
+  }
+
+  function closeLightbox() {
+    if (!lb) return;
+    lb.classList.remove('on');
+    lb.style.display = 'none';
+    document.body.style.overflow = '';
+    if (lastTriggerEl) {
+      try { lastTriggerEl.focus(); } catch (e) {}
+    }
+  }
+
+  function prevPhoto() {
+    if (currentGalleryCards.length <= 1) return;
+    const nextIdx = (currentIndex - 1 + currentGalleryCards.length) % currentGalleryCards.length;
+    updateLightbox(nextIdx);
+  }
+
+  function nextPhoto() {
+    if (currentGalleryCards.length <= 1) return;
+    const nextIdx = (currentIndex + 1) % currentGalleryCards.length;
+    updateLightbox(nextIdx);
+  }
+
+  // Delegasi event klik
+  document.addEventListener('click', (e) => {
+    // 1. Tombol close
+    if (e.target.closest('#lb-close') || e.target.closest('.lb-close')) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeLightbox();
+      return;
+    }
+
+    // 2. Tombol Navigasi
+    if (e.target.closest('#lb-prev') || e.target.closest('.lb-prev')) {
+      e.preventDefault();
+      e.stopPropagation();
+      prevPhoto();
+      return;
+    }
+    if (e.target.closest('#lb-next') || e.target.closest('.lb-next')) {
+      e.preventDefault();
+      e.stopPropagation();
+      nextPhoto();
+      return;
+    }
+
+    // 3. Klik Backdrop luar
+    if (e.target === lb) {
+      e.preventDefault();
+      closeLightbox();
+      return;
+    }
+
+    // 4. Klik kartu gallery
+    const card = e.target.closest('.gallery-card-trigger');
+    if (card) {
+      e.preventDefault();
+      openLightbox(card);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const card = document.activeElement ? document.activeElement.closest('.gallery-card-trigger') : null;
+      if (card && document.activeElement === card) {
+        e.preventDefault();
+        openLightbox(card);
+      }
+    }
+    if (lb && (lb.classList.contains('on') || lb.style.display !== 'none')) {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') prevPhoto();
+      if (e.key === 'ArrowRight') nextPhoto();
+    }
+  });
+
+  if (lbClose) lbClose.addEventListener('click', (e) => { e.preventDefault(); closeLightbox(); });
+  if (lbPrev) lbPrev.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); prevPhoto(); });
+  if (lbNext) lbNext.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); nextPhoto(); });
+</script>

@@ -1,0 +1,62 @@
+---
+import settings from '../data/settings.json';
+import disciplinesData from '../data/disciplines.json';
+
+const divisions = disciplinesData.items || [];
+---
+
+<footer>
+  <div class="wrap">
+    <div class="fcols">
+      <div>
+        <img
+          src="/logo.webp"
+          alt="Logo ITPLN COMBAT"
+          width="72"
+          height="72"
+          class="rounded-full"
+        />
+        <p class="text-mute max-w-[36ch] mt-3 text-sm">
+          UKM bela diri Institut Teknologi PLN. Est. 2025. Wadah pembinaan karakter, sportivitas, dan prestasi mahasiswa.
+        </p>
+      </div>
+
+      <div>
+        <h4>Menu Utama</h4>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/news">News</a>
+        <a href="/gallery">Gallery</a>
+      </div>
+
+      <div>
+        <h4>Cabang Latihan</h4>
+        {divisions.map((d) => (
+          <a href={`/divisions/${d.slug}`}>
+            {d.nama}
+          </a>
+        ))}
+      </div>
+
+      <div>
+        <h4>Kontak &amp; Akses</h4>
+        <a href={settings.link_form_daftar} target="_blank" rel="noopener noreferrer">
+          Daftar Anggota
+        </a>
+        <a href={settings.link_form_merch} target="_blank" rel="noopener noreferrer">
+          Pesan Merchandise
+        </a>
+        <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer">
+          Instagram: @itplncombat
+        </a>
+        <a href={`mailto:${settings.email}`}>
+          {settings.email}
+        </a>
+      </div>
+    </div>
+
+    <div class="copy">
+      © 2026 ITPLN COMBAT – Institut Teknologi PLN. Semua hak dilindungi.
+    </div>
+  </div>
+</footer>

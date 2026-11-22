@@ -1,0 +1,318 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAllNews } from '../../lib/content.js';
+import settings from '../../data/settings.json';
+
+export async function getStaticPaths() {
+  // Hanya bangun halaman publik untuk berita yang bukan Draft
+  const newsList = await getAllNews({ includeDrafts: false });
+
+  return newsList.map((item) => ({
+    params: { slug: item.slug },
+    props: {
+      article: item,
+      relatedNews: newsList.filter((n) => n.slug !== item.slug).slice(0, 3),
+    },
+  }));
+}
+
+const { article, relatedNews } = Astro.props;
+const { Content } = await article.render();
+---
+
+<Layout
+  title={`${article.title} – News ITPLN COMBAT`}
+  description={article.description}
+>
+  <article
+    class="py-12 md:py-16"
+    id="news-detail-article"
+    data-start={article.startDate}
+    data-end={article.endDate}
+    data-status={article.publicationStatus}
+  >
+    <div class="wrap max-w-4xl">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" class="mb-6 flex items-center gap-2 text-sm text-mute flex-wrap">
+        <a href="/" class="hover:text-white transition-colors">Home</a>
+        <span>/</span>
+        <a href="/news" class="hover:text-white transition-colors">News</a>
+        <span>/</span>
+        <span class="text-combat-red2 font-semibold line-clamp-1">{article.title}</span>
+      </nav>
+
+      <!-- Banner Peringatan Arsip jika Status EXPIRED -->
+      <div
+        id="expired-archive-banner"
+        class={`mb-6 p-4 border-l-4 border-[#e74c3c] bg-[#2a1215]/90 text-gray-200 rounded-r ${
+          article.computedStatus === 'Expired' ? 'block' : 'hidden'
+        }`}
+        role="status"
+      >
+        <div class="flex items-center gap-2 font-condensed font-bold uppercase tracking-wider text-[#ff6b6b] text-sm mb-1">
+          <span>⚠️ ARSIP BERITA (EXPIRED)</span>
+        </div>
+        <p class="text-sm text-gray-300 m-0">
+          Masa berlaku atau periode kegiatan berita ini telah berakhir pada <strong class="text-white">{article.formattedEnd}</strong>. Halaman ini tetap dapat diakses sebagai dokumentasi arsip resmi UKM ITPLN COMBAT.
+        </p>
+      </div>
+
+      <!-- Banner Informasi jika Status UPCOMING -->
+      <div
+        id="upcoming-info-banner"
+        class={`mb-6 p-4 border-l-4 border-[#f1c40f] bg-[#2a2412]/90 text-gray-200 rounded-r ${
+          article.computedStatus === 'Upcoming' ? 'block' : 'hidden'
+        }`}
+        role="status"
+      >
+        <div class="flex items-center gap-2 font-condensed font-bold uppercase tracking-wider text-[#f1c40f] text-sm mb-1">
+          <span>📅 AGENDA MENDATANG (UPCOMING)</span>
+        </div>
+        <p class="text-sm text-gray-300 m-0">
+          Kegiatan atau periode informasi ini dijadwalkan mulai pada <strong class="text-white">{article.formattedStart}</strong>.
+        </p>
+      </div>
+
+      <!-- Meta Kategori & Badge Status -->
+      <div class="flex items-center gap-3 flex-wrap mb-4">
+        <span class="cat bg-combat-red/15 border border-combat-red/40 px-3 py-1 text-xs">
+          {article.category}
+        </span>
+
+        <span
+          id="detail-status-badge"
+          class={`news-status-badge ${article.badge.cssClass} font-condensed font-bold uppercase text-xs px-3 py-1`}
+          data-start={article.startDate}
+          data-end={article.endDate}
+        >
+          {article.badge.dotLabel}
+        </span>
+
+        {article.featured && (
+          <span class="bg-white/10 border border-white/20 text-white font-condensed font-bold uppercase text-xs px-2.5 py-1 tracking-wider">
+            ★ FEATURED
+          </span>
+        )}
+      </div>
+
+      <!-- Judul Berita -->
+      <h1 class="text-4xl md:text-6xl leading-tight mb-4">
+        {article.title}
+      </h1>
+
+      <!-- Penulis & Tanggal Publikasi -->
+      <div class="flex items-center gap-4 text-sm text-mute mb-8 flex-wrap border-b border-line pb-5">
+        <span>Oleh: <strong class="text-white">{article.author}</strong></span>
+        <span>•</span>
+        <span>Dipublikasikan: <time datetime={article.publishDate}>{article.formattedPublishShort}</time></span>
+      </div>
+
+      <!-- Featured Image dengan Fallback -->
+      <div class="relative aspect-video bg-panel border border-line overflow-hidden mb-8 shadow-2xl">
+        {article.featuredImage ? (
+          <img
+            src={article.featuredImage}
+            alt={article.imageAlt}
+            class="w-full h-full object-cover"
+            loading="eager"
+            decoding="async"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+          />
+        ) : null}
+        <div
+          class="ph w-full h-full"
+          style={`display: ${article.featuredImage ? 'none' : 'grid'}; background: linear-gradient(135deg, #8f0c12, #000);`}
+        >
+          <span>ITPLN COMBAT</span>
+        </div>
+      </div>
+
+      <!-- Kotak Durasi Berlaku Berita (StartDate s/d EndDate) -->
+      <div class="news-duration-box mb-8">
+        <div class="duration-row">
+          <span class="duration-label">Mulai Berlaku:</span>
+          <span class="duration-val">{article.formattedStart}</span>
+        </div>
+        <div class="duration-row">
+          <span class="duration-label">Berakhir Pada:</span>
+          <span class="duration-val">{article.formattedEnd}</span>
+        </div>
+        <div class="duration-row">
+          <span class="duration-label">Zona Waktu:</span>
+          <span class="duration-val text-combat-red2">Asia/Jakarta (WIB / UTC+7)</span>
+        </div>
+      </div>
+
+      <!-- Ringkasan Lead -->
+      <p class="text-xl text-white font-medium leading-relaxed mb-6 border-l-4 border-combat-red pl-4">
+        {article.description}
+      </p>
+
+      <!-- Isi Lengkap Markdown -->
+      <div class="news-markdown-body prose prose-invert max-w-none text-gray-200 leading-relaxed space-y-5 text-lg">
+        <Content />
+      </div>
+
+      <!-- Footer Artikel -->
+      <div class="mt-12 pt-6 border-t border-line flex items-center justify-between flex-wrap gap-4">
+        <a href="/news" class="btn ghost text-sm">
+          ← Kembali ke Daftar Berita
+        </a>
+        <a
+          href={settings.link_form_daftar}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn text-sm"
+        >
+          Daftar Anggota UKM
+        </a>
+      </div>
+    </div>
+  </article>
+
+  <!-- Berita Lainnya -->
+  {relatedNews.length > 0 && (
+    <section class="pt-0 border-t border-line">
+      <div class="wrap pt-12">
+        <div class="head">
+          <div>
+            <h2>Berita lainnya</h2>
+            <p class="sub">Informasi dan arsip kegiatan UKM ITPLN COMBAT.</p>
+          </div>
+          <a href="/news" class="btn ghost text-sm px-5 py-2.5">
+            Lihat Semua →
+          </a>
+        </div>
+
+        <div class="grid">
+          {relatedNews.map((item) => (
+            <a
+              href={`/news/${item.slug}`}
+              class="card rev no-underline"
+              data-news-card
+              data-start={item.startDate}
+              data-end={item.endDate}
+            >
+              <div class="ph" style="background: #111;">
+                <img
+                  src={item.featuredImage}
+                  alt={item.imageAlt}
+                  loading="lazy"
+                  decoding="async"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+                />
+                <span style="display: none;">ITPLN</span>
+              </div>
+              <div class="body">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <span class="cat">{item.category}</span>
+                  <span
+                    class={`news-status-badge ${item.badge.cssClass}`}
+                    data-status-badge
+                    data-start={item.startDate}
+                    data-end={item.endDate}
+                  >
+                    {item.badge.dotLabel}
+                  </span>
+                </div>
+                <h3>{item.title}</h3>
+                <p class="line-clamp-2">{item.description}</p>
+                <div class="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs text-mute">
+                  <span>{item.formattedPublishShort}</span>
+                  <span class="text-combat-red2 font-bold uppercase tracking-wider">
+                    Baca Selengkapnya →
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style is:global>
+  .news-markdown-body h2,
+  .news-markdown-body h3,
+  .news-markdown-body h4 {
+    color: #ffffff;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.75rem;
+  }
+  .news-markdown-body h2::after {
+    display: none;
+  }
+  .news-markdown-body ul,
+  .news-markdown-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .news-markdown-body ul {
+    list-style-type: disc;
+  }
+  .news-markdown-body ol {
+    list-style-type: decimal;
+  }
+  .news-markdown-body li {
+    margin-bottom: 0.5rem;
+  }
+  .news-markdown-body strong {
+    color: #ffffff;
+  }
+</style>
+
+<script is:inline>
+  // Sinkronisasi Real-Time Status Tanggal (Asia/Jakarta UTC+7) pada Browser Pengunjung
+  (function syncRealtimeNewsStatus() {
+    function parseWIB(raw, isEnd) {
+      if (!raw) return null;
+      const s = String(raw).trim();
+      if (!s) return null;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        return Date.parse(s + (isEnd ? 'T23:59:59.999+07:00' : 'T00:00:00.000+07:00'));
+      }
+      const norm = s.replace(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/, '$1T$2');
+      const hasTz = /([Zz]|[+-]\d{2}:?\d{2})$/.test(norm);
+      return Date.parse(hasTz ? norm : norm + '+07:00');
+    }
+
+    function evaluateStatus(startStr, endStr) {
+      const now = Date.now();
+      const startMs = parseWIB(startStr, false);
+      const endMs = parseWIB(endStr, true);
+      if (startMs && !Number.isNaN(startMs) && now < startMs) {
+        return { code: 'Upcoming', dotLabel: '● UPCOMING', cls: 'status-scheduled' };
+      }
+      if (endMs && !Number.isNaN(endMs) && now > endMs) {
+        return { code: 'Expired', dotLabel: '● EXPIRED', cls: 'status-expired' };
+      }
+      return { code: 'Active', dotLabel: '● ACTIVE', cls: 'status-active' };
+    }
+
+    const detailBadge = document.getElementById('detail-status-badge');
+    const expiredBanner = document.getElementById('expired-archive-banner');
+    const upcomingBanner = document.getElementById('upcoming-info-banner');
+
+    if (detailBadge) {
+      const st = evaluateStatus(detailBadge.dataset.start, detailBadge.dataset.end);
+      detailBadge.textContent = st.dotLabel;
+      detailBadge.className = 'news-status-badge font-condensed font-bold uppercase text-xs px-3 py-1 ' + st.cls;
+      if (expiredBanner) {
+        expiredBanner.classList.toggle('hidden', st.code !== 'Expired');
+        expiredBanner.classList.toggle('block', st.code === 'Expired');
+      }
+      if (upcomingBanner) {
+        upcomingBanner.classList.toggle('hidden', st.code !== 'Upcoming');
+        upcomingBanner.classList.toggle('block', st.code === 'Upcoming');
+      }
+    }
+
+    document.querySelectorAll('[data-status-badge]').forEach((el) => {
+      const st = evaluateStatus(el.dataset.start, el.dataset.end);
+      el.textContent = st.dotLabel;
+      el.className = 'news-status-badge ' + st.cls;
+    });
+  })();
+</script>

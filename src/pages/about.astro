@@ -1,0 +1,119 @@
+---
+import Layout from '../layouts/Layout.astro';
+import aboutData from '../data/about.json';
+import disciplinesData from '../data/disciplines.json';
+import settings from '../data/settings.json';
+
+const jadwal = aboutData.jadwal && aboutData.jadwal.items ? aboutData.jadwal.items : [];
+const divisions = disciplinesData.items || [];
+---
+
+<Layout
+  title="About – ITPLN COMBAT"
+  description="Profil, Visi, Misi, Divisi Cabang Bela Diri, dan Jadwal Latihan resmi UKM Bela Diri ITPLN COMBAT."
+>
+  <!-- Tentang Kami -->
+  <section>
+    <div class="wrap">
+      <h2>Tentang kami</h2>
+      <p class="sub">{aboutData.tentang}</p>
+      <br /><br />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-9">
+        <div class="bg-panel border border-line border-t-4 border-t-combat-red p-7 rev">
+          <h3 class="text-combat-red2 text-3xl mb-3">Visi</h3>
+          <p class="text-gray-300 leading-relaxed">{aboutData.visi}</p>
+        </div>
+        <div class="bg-panel border border-line border-t-4 border-t-combat-red p-7 rev">
+          <h3 class="text-combat-red2 text-3xl mb-3">Misi</h3>
+          <p class="text-gray-300 leading-relaxed">{aboutData.misi}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Empat Cabang Latihan Bela Diri -->
+  <section class="pt-0">
+    <div class="wrap">
+      <h2>Cabang Latihan Bela Diri</h2>
+      <p class="sub">
+        Empat jenis cabang latihan bela diri kontak yang dipelajari bersama di UKM ITPLN COMBAT.
+      </p>
+      <br />
+      <div class="grid">
+        {divisions.map((div) => (
+          <a
+            href={`/divisions/${div.slug}`}
+            class="card rev no-underline group"
+          >
+            <div class="ph" style="background: #111;">
+              {div.foto ? (
+                <img
+                  src={div.foto}
+                  alt={div.alt || div.nama}
+                  loading="lazy"
+                  decoding="async"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                />
+              ) : null}
+              <span style={div.foto ? 'display: none;' : ''}>{div.nama}</span>
+            </div>
+            <div class="body">
+              <div class="cat">Cabang Latihan</div>
+              <h3>{div.nama}</h3>
+              <p class="line-clamp-3">{div.deskripsi}</p>
+              <div class="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs">
+                <span class="text-mute">Loby Depan</span>
+                <span class="text-combat-red2 group-hover:text-white font-bold uppercase tracking-wider transition-colors">
+                  Lihat Detail →
+                </span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Jadwal Latihan (Tanpa kolom Cabang, Tempat di Loby Depan) -->
+  <section class="pt-0">
+    <div class="wrap">
+      <h2>Jadwal latihan</h2>
+      <p class="sub">Jadwal resmi latihan UKM ITPLN COMBAT untuk seluruh anggota.</p>
+      <br />
+      <div class="scroll rev">
+        <table>
+          <thead>
+            <tr>
+              <th>Hari</th>
+              <th>Waktu</th>
+              <th>Tempat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {jadwal.map((row) => (
+              <tr>
+                <td class="font-bold text-white">{row.hari}</td>
+                <td>{row.waktu}</td>
+                <td class="text-combat-red2 font-semibold">{row.tempat}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Band CTA Syarat -->
+  <div class="band rev">
+    <h2>{aboutData.syarat}</h2>
+    <br />
+    <a
+      class="btn"
+      href={settings.link_form_daftar}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Daftar Anggota
+    </a>
+  </div>
+</Layout>

@@ -1,0 +1,22 @@
+{
+  "tentang": "ITPLN COMBAT adalah Unit Kegiatan Mahasiswa di Institut Teknologi PLN yang menjadi wadah olahraga bela diri kontak. Berdiri 2025, kami melatih fisik, mental, dan sportivitas, serta membawa nama kampus ke kejuaraan.",
+  "visi": "Menjadi UKM bela diri yang melahirkan atlet berprestasi dan mahasiswa berkarakter.",
+  "misi": "Membina anggota secara rutin, mengikuti kejuaraan antar kampus, dan membangun komunitas yang aman dan saling menghargai.",
+  "syarat": "Syarat: mahasiswa aktif ITPLN dan sehat jasmani",
+  "anggota_aktif": 65,
+  "medali_diraih": 14,
+  "jadwal": {
+    "items": [
+      {
+        "hari": "Rabu",
+        "waktu": "19:00 - 21:00",
+        "tempat": "Loby Depan"
+      },
+      {
+        "hari": "Sabtu",
+        "waktu": "19:00 - 21:00",
+        "tempat": "Loby Depan"
+      }
+    ]
+  }
+}

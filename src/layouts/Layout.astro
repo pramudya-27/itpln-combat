@@ -1,0 +1,80 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+import '../styles/header.css';
+import '../styles/footer.css';
+import '../styles/modal.css';
+import '../styles/lightbox.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'ITPLN COMBAT – UKM Bela Diri Institut Teknologi PLN',
+  description = 'Website resmi UKM Bela Diri ITPLN COMBAT (Institut Teknologi PLN). Muay Thai, Boxing, Tarung Derajat, dan MMA.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    
+    <!-- Favicon Resmi Logo Lingkaran ITPLN COMBAT -->
+    <link rel="icon" type="image/webp" href="/logo.webp" />
+    <link rel="shortcut icon" href="/logo.webp" />
+    <link rel="apple-touch-icon" href="/logo.webp" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <Header />
+    <main id="app">
+      <slot />
+    </main>
+    <Footer />
+
+    <!-- Script Global untuk Interaksi (Reveal on Scroll & Sticky Header) -->
+    <script is:inline>
+      // Header shrink on scroll
+      window.addEventListener('scroll', () => {
+        const hd = document.getElementById('hd');
+        if (hd) {
+          hd.classList.toggle('sm', window.scrollY > 40);
+        }
+      }, { passive: true });
+
+      // Reveal on scroll (IntersectionObserver)
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      document.querySelectorAll('.rev').forEach(el => observer.observe(el));
+
+      // Redirect otomatis token undangan/pemulihan akun Decap CMS (Netlify Identity) ke /cms/
+      if (
+        window.location.hash &&
+        /(invite_token|recovery_token|confirmation_token|access_token)=/.test(window.location.hash)
+      ) {
+        window.location.replace('/cms/' + window.location.hash);
+      }
+    </script>
+  </body>
+</html>

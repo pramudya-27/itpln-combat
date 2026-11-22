@@ -1,0 +1,289 @@
+# =====================================================================
+# KONFIGURASI DECAP CMS – UKM BELA DIRI ITPLN COMBAT
+# Terintegrasi dengan Astro Content Collections (src/content/) & Data (src/data/)
+# =====================================================================
+
+backend:
+  name: git-gateway
+  branch: main
+
+# Catatan Hosting & OAuth Backend:
+# 1. Netlify (Default): Menggunakan `git-gateway` + Netlify Identity (tanpa mengekspos token di frontend).
+# 2. Hosting Non-Netlify (Cloudflare Pages / Vercel / VPS) dengan GitHub OAuth Proxy:
+#    backend:
+#      name: github
+#      repo: organisasi/itpln-combat
+#      branch: main
+#      base_url: https://oauth-proxy-domain-anda.com
+#      auth_endpoint: auth
+# 3. Mode Pengembangan Lokal (Jalankan `npx decap-server` di terminal):
+#    Aktifkan baris di bawah ini saat pengembangan di localhost:
+# local_backend: true
+
+locale: "id"
+media_folder: "public/uploads"
+public_folder: "/uploads"
+site_url: "/"
+display_url: "/"
+logo_url: "/logo.webp"
+
+collections:
+  # -------------------------------------------------------------------
+  # 1. NEWS COLLECTION (Astro Content Collection: src/content/news/*.md)
+  # -------------------------------------------------------------------
+  - name: "news"
+    label: "News (Kabar & Berita)"
+    label_singular: "Berita"
+    folder: "src/content/news"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{title}} — [{{category}}] • Status: {{status}} ({{startDate}})"
+    sortable_fields: ["startDate", "publishDate", "title", "category", "status"]
+    fields:
+      - label: "Judul Berita"
+        name: "title"
+        widget: "string"
+        required: true
+        hint: "Judul utama berita atau pengumuman kegiatan UKM"
+
+      - label: "Slug URL"
+        name: "customSlug"
+        widget: "string"
+        required: false
+        hint: "Slug URL artikel (contoh: pendaftaran-anggota-baru-2026). Kosongkan untuk mengikuti nama file otomatis."
+
+      - label: "Deskripsi Singkat"
+        name: "description"
+        widget: "text"
+        required: true
+        hint: "Ringkasan 1-2 kalimat yang tampil pada kartu berita dan meta SEO"
+
+      - label: "Featured Image (Gambar Utama)"
+        name: "featuredImage"
+        widget: "image"
+        media_folder: "/public/uploads/news"
+        public_folder: "/uploads/news"
+        required: true
+        hint: "Unggah foto berita (disarankan rasio 16:9, maks 1600px, di bawah 500 KB) atau masukkan URL gambar"
+
+      - label: "Alt Text Gambar"
+        name: "imageAlt"
+        widget: "string"
+        default: "Dokumentasi Berita ITPLN COMBAT"
+        required: true
+        hint: "Teks alternatif deskripsi gambar untuk aksesibilitas"
+
+      - label: "Kategori Berita"
+        name: "category"
+        widget: "select"
+        options:
+          - "Kegiatan"
+          - "Pertandingan"
+          - "Latihan"
+          - "Pengumuman"
+          - "Prestasi"
+        default: "Kegiatan"
+        required: true
+
+      - label: "Penulis"
+        name: "author"
+        widget: "string"
+        default: "Tim Humas ITPLN COMBAT"
+        required: true
+
+      - label: "Tanggal Mulai Berita (startDate - WIB)"
+        name: "startDate"
+        widget: "datetime"
+        format: "YYYY-MM-DDTHH:mm:ss"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm"
+        required: true
+        hint: "Zona waktu Asia/Jakarta (WIB). Jika waktu sekarang belum mencapai startDate, status otomatis UPCOMING."
+
+      - label: "Tanggal Berakhir Berita (endDate - WIB)"
+        name: "endDate"
+        widget: "datetime"
+        format: "YYYY-MM-DDTHH:mm:ss"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm"
+        required: false
+        hint: "Zona waktu Asia/Jakarta (WIB). Jika waktu sekarang melewati endDate, status otomatis berubah menjadi EXPIRED."
+
+      - label: "Tanggal Publikasi"
+        name: "publishDate"
+        widget: "datetime"
+        format: "YYYY-MM-DDTHH:mm:ss"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm"
+        required: false
+        hint: "Tanggal rilis artikel untuk pengurutan berita terbaru"
+
+      - label: "Status Publikasi"
+        name: "status"
+        widget: "select"
+        options:
+          - "Published"
+          - "Draft"
+        default: "Published"
+        required: true
+        hint: "Berita berstatus Draft hanya tersimpan di CMS dan tidak ditampilkan ke pengunjung publik."
+
+      - label: "Featured (Berita Sorotan)"
+        name: "featured"
+        widget: "boolean"
+        default: false
+        required: false
+
+      - label: "Isi Berita Lengkap (Markdown)"
+        name: "body"
+        widget: "markdown"
+        required: true
+        hint: "Tulis isi berita lengkap menggunakan format Markdown (mendukung subjudul, daftar, kutipan, dan tautan)."
+
+  # -------------------------------------------------------------------
+  # 2. GALLERY COLLECTION (Astro Content Collection: src/content/gallery/*.json)
+  # -------------------------------------------------------------------
+  - name: "gallery"
+    label: "Gallery (Dokumentasi Foto)"
+    label_singular: "Foto Galeri"
+    folder: "src/content/gallery"
+    create: true
+    slug: "{{slug}}"
+    extension: "json"
+    format: "json"
+    identifier_field: "title"
+    summary: "#{{order}} {{title}} — [{{category}}] ({{status}})"
+    sortable_fields: ["order", "date", "title", "category", "status"]
+    fields:
+      - label: "Judul Foto"
+        name: "title"
+        widget: "string"
+        required: true
+
+      - label: "Deskripsi Kegiatan"
+        name: "description"
+        widget: "text"
+        required: true
+
+      - label: "Gambar"
+        name: "image"
+        widget: "image"
+        media_folder: "/public/uploads/gallery"
+        public_folder: "/uploads/gallery"
+        required: true
+        hint: "Unggah file foto atau masukkan URL gambar eksternal yang valid"
+
+      - label: "Alt Text Gambar"
+        name: "alt"
+        widget: "string"
+        required: true
+        hint: "Deskripsi singkat isi foto untuk pembaca layar dan SEO"
+
+      - label: "Kategori Kegiatan"
+        name: "category"
+        widget: "select"
+        options:
+          - "Muay Thai"
+          - "Boxing"
+          - "Tarung Derajat"
+          - "MMA"
+          - "Training"
+          - "Competition"
+          - "Events"
+        default: "Training"
+        required: true
+
+      - label: "Tanggal Kegiatan"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        required: true
+
+      - label: "Featured Image"
+        name: "featured"
+        widget: "boolean"
+        default: false
+        required: false
+
+      - label: "Urutan Tampilan"
+        name: "order"
+        widget: "number"
+        value_type: "int"
+        default: 1
+        min: 1
+        required: true
+        hint: "Angka lebih kecil tampil lebih awal (1, 2, 3, dst.)"
+
+      - label: "Status Publikasi"
+        name: "status"
+        widget: "select"
+        options:
+          - "Published"
+          - "Draft"
+        default: "Published"
+        required: true
+
+  # -------------------------------------------------------------------
+  # 3. CABANG LATIHAN BELA DIRI (src/data/disciplines.json)
+  # -------------------------------------------------------------------
+  - name: "cabang"
+    label: "Cabang Latihan"
+    files:
+      - label: "Daftar Cabang Latihan Bela Diri"
+        name: "disciplines"
+        file: "src/data/disciplines.json"
+        fields:
+          - label: "Daftar Cabang Latihan"
+            name: "items"
+            widget: "list"
+            fields:
+              - { label: "Nama Cabang", name: "nama", widget: "string", required: true }
+              - { label: "Slug URL", name: "slug", widget: "string", required: true, hint: "Contoh: muay-thai, boxing, tarung-derajat, mma" }
+              - { label: "Deskripsi Singkat", name: "deskripsi", widget: "text", required: true }
+              - { label: "Deskripsi Lengkap", name: "deskripsi_lengkap", widget: "text", required: true }
+              - { label: "Foto Cabang", name: "foto", widget: "image", media_folder: "/public/uploads/divisions", public_folder: "/uploads/divisions", required: true }
+              - { label: "Alt Text Foto", name: "alt", widget: "string", required: true }
+              - label: "Fokus Materi & Teknik"
+                name: "fokus_teknik"
+                widget: "list"
+                field: { label: "Teknik", name: "item", widget: "string" }
+              - label: "Perlengkapan Latihan"
+                name: "perlengkapan"
+                widget: "list"
+                field: { label: "Perlengkapan", name: "item", widget: "string" }
+
+  # -------------------------------------------------------------------
+  # 4. PROFIL ORGANISASI (src/data/about.json)
+  # -------------------------------------------------------------------
+  - name: "tentang"
+    label: "Profil UKM"
+    files:
+      - label: "Profil & Visi Misi UKM"
+        name: "about"
+        file: "src/data/about.json"
+        fields:
+          - { label: "Tentang Kami", name: "tentang", widget: "text", required: true }
+          - { label: "Visi", name: "visi", widget: "text", required: true }
+          - { label: "Misi", name: "misi", widget: "text", required: true }
+          - { label: "Syarat Anggota", name: "syarat", widget: "string", required: true }
+
+  # -------------------------------------------------------------------
+  # 5. PENGATURAN UMUM & KONTAK (src/data/settings.json)
+  # -------------------------------------------------------------------
+  - name: "pengaturan"
+    label: "Pengaturan & Kontak"
+    files:
+      - label: "Pengaturan Umum"
+        name: "settings"
+        file: "src/data/settings.json"
+        fields:
+          - { label: "Link Formulir Pendaftaran", name: "link_form_daftar", widget: "string", required: true }
+          - { label: "Link Formulir Merchandise", name: "link_form_merch", widget: "string", required: true }
+          - { label: "URL Instagram", name: "instagram_url", widget: "string", required: true }
+          - { label: "Email Kontak", name: "email", widget: "string", required: true }
+          - { label: "Nama Event Terdekat", name: "event_nama", widget: "string", required: true }
+          - { label: "Tanggal Event", name: "event_tanggal", widget: "datetime", format: "YYYY-MM-DDTHH:mm:ssZ", date_format: "YYYY-MM-DD", time_format: "HH:mm", required: true }

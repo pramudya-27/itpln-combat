@@ -1,0 +1,210 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import StoryRail from '../components/StoryRail.astro';
+import Stats from '../components/Stats.astro';
+import NewsModal from '../components/NewsModal.astro';
+import { getAllNews } from '../lib/content.js';
+import settings from '../data/settings.json';
+
+// Ambil berita publik (tanpa Draft), urutkan terbaru
+const allPublicNews = await getAllNews({ includeDrafts: false });
+const displayNews = allPublicNews.slice(0, 3);
+---
+
+<Layout title="ITPLN COMBAT – UKM Bela Diri Institut Teknologi PLN">
+  <Hero />
+  <StoryRail />
+  <Stats />
+
+  <!-- Kabar Terbaru -->
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <h2>Kabar terbaru</h2>
+          <p class="sub">
+            Informasi kegiatan, prestasi, dan jadwal latihan terbaru UKM ITPLN COMBAT.
+          </p>
+        </div>
+        <div>
+          <a href="/news" class="btn ghost text-sm px-5 py-2.5">
+            Semua Kabar →
+          </a>
+        </div>
+      </div>
+
+      <div id="home-news-empty" class={`bg-panel border border-line p-10 text-center rev ${displayNews.length === 0 ? 'block' : 'hidden'}`}>
+        <h3 class="text-2xl mb-2">Belum Ada Kabar Terbaru</h3>
+        <p class="text-mute">
+          Informasi dan kabar terbaru UKM ITPLN COMBAT akan segera hadir di sini.
+        </p>
+      </div>
+
+      <div id="home-news-grid" class={`grid ${displayNews.length === 0 ? 'hidden' : ''}`}>
+        {displayNews.map((item, i) => (
+          <div
+            class="card rev news-card-trigger cursor-pointer"
+            tabindex="0"
+            role="button"
+            aria-label={`Buka berita: ${item.title}`}
+            data-judul={item.title}
+            data-slug={item.slug}
+            data-kategori={item.category}
+            data-author={item.author}
+            data-ringkasan={item.description}
+            data-konten={item.body}
+            data-foto={item.featuredImage}
+            data-mulai={item.startDate}
+            data-selesai={item.endDate}
+            data-status={item.computedStatus}
+            data-color={String(i + 1)}
+          >
+            <div class="ph" style="background: #111;">
+              {item.featuredImage ? (
+                <img
+                  src={item.featuredImage}
+                  alt={item.imageAlt}
+                  loading="lazy"
+                  decoding="async"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                />
+              ) : null}
+              <span style={item.featuredImage ? 'display: none;' : ''}>ITPLN</span>
+            </div>
+
+            <div class="body">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <div class="cat">{item.category}</div>
+                <span
+                  class={`news-status-badge ${item.badge.cssClass}`}
+                  data-live-status-badge
+                  data-start={item.startDate}
+                  data-end={item.endDate}
+                >
+                  {item.badge.dotLabel}
+                </span>
+              </div>
+
+              <h3>{item.title}</h3>
+              <p class="line-clamp-3">{item.description}</p>
+
+              <div class="mt-4 pt-3 border-t border-line flex items-center justify-between gap-2 text-xs">
+                <span class="text-mute">{item.formattedPublishShort}</span>
+                <a
+                  href={`/news/${item.slug}`}
+                  data-direct-link
+                  class="text-combat-red2 hover:text-white font-bold uppercase tracking-wider no-underline transition-colors"
+                >
+                  Baca Artikel →
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Band CTA -->
+  <div class="band rev">
+    <h2>Siap masuk arena?</h2>
+    <br />
+    <a
+      class="btn"
+      href={settings.link_form_daftar}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Daftar Anggota
+    </a>
+  </div>
+
+  <!-- Modal Detail Berita -->
+  <NewsModal />
+</Layout>
+
+<script is:inline>
+  (async function syncHomeNews() {
+    function parseWIB(raw, isEnd) {
+      if (!raw) return null;
+      const s = String(raw).trim();
+      if (!s) return null;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        return Date.parse(s + (isEnd ? 'T23:59:59.999+07:00' : 'T00:00:00.000+07:00'));
+      }
+      const norm = s.replace(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/, '$1T$2');
+      const hasTz = /([Zz]|[+-]\d{2}:?\d{2})$/.test(norm);
+      return Date.parse(hasTz ? norm : norm + '+07:00');
+    }
+
+    function evalBadge(startStr, endStr) {
+      const now = Date.now();
+      const sMs = parseWIB(startStr, false);
+      const eMs = parseWIB(endStr, true);
+      if (sMs && !Number.isNaN(sMs) && now < sMs) return { code: 'Upcoming', label: '● UPCOMING', cls: 'status-scheduled' };
+      if (eMs && !Number.isNaN(eMs) && now > eMs) return { code: 'Expired', label: '● EXPIRED', cls: 'status-expired' };
+      return { code: 'Active', label: '● ACTIVE', cls: 'status-active' };
+    }
+
+    // Update badge berita yang sudah dirender dari Astro
+    document.querySelectorAll('[data-live-status-badge]').forEach((badge) => {
+      const st = evalBadge(badge.dataset.start, badge.dataset.end);
+      badge.textContent = st.label;
+      badge.className = 'news-status-badge ' + st.cls;
+    });
+
+    // Jika static grid kosong, cek apakah ada berita dinamis di /api/admin/content atau localStorage
+    const grid = document.getElementById('home-news-grid');
+    const empty = document.getElementById('home-news-empty');
+    if (grid && grid.children.length === 0) {
+      let dynamicNews = [];
+      try {
+        const res = await fetch('/api/admin/content');
+        if (res.ok) {
+          const j = await res.json();
+          if (j.success && j.data?.news) dynamicNews = j.data.news;
+        }
+      } catch {}
+
+      if (!dynamicNews.length) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('itpln_combat_dynamic_content') || '{}');
+          if (Array.isArray(saved.news)) dynamicNews = saved.news;
+        } catch {}
+      }
+
+      const pubNews = dynamicNews.filter(n => String(n.status || 'Published').toLowerCase() !== 'draft').slice(0, 3);
+      if (pubNews.length > 0) {
+        empty?.classList.add('hidden');
+        grid.classList.remove('hidden');
+        grid.innerHTML = pubNews.map((item, i) => {
+          const st = evalBadge(item.startDate, item.endDate);
+          const safe = (v) => String(v || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+          return `
+            <div class="card rev in news-card-trigger cursor-pointer" tabindex="0" role="button"
+              data-judul="${safe(item.title)}" data-slug="${safe(item.slug)}" data-kategori="${safe(item.category)}"
+              data-author="${safe(item.author)}" data-ringkasan="${safe(item.description)}" data-konten="${safe(item.body || item.description)}"
+              data-foto="${safe(item.featuredImage)}" data-mulai="${safe(item.startDate)}" data-selesai="${safe(item.endDate)}" data-color="${i + 1}">
+              <div class="ph" style="background:#111;">
+                <img src="${safe(item.featuredImage)}" alt="${safe(item.imageAlt || item.title)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                <span style="display:none;">ITPLN</span>
+              </div>
+              <div class="body">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <div class="cat">${safe(item.category)}</div>
+                  <span class="news-status-badge ${st.cls}">${st.label}</span>
+                </div>
+                <h3>${safe(item.title)}</h3>
+                <p class="line-clamp-3">${safe(item.description)}</p>
+                <div class="mt-4 pt-3 border-t border-line flex items-center justify-between text-xs">
+                  <span class="text-mute">${safe(item.author)}</span>
+                  <span class="text-combat-red2 font-bold uppercase tracking-wider">Baca Detail →</span>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      }
+    }
+  })();
+</script>

@@ -1,0 +1,26 @@
+/* Category Filter Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.tabs button {
+  font: 700 16px "Barlow Condensed", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 9px 20px;
+  background: none;
+  border: 2px solid var(--line);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.tabs button[aria-pressed="true"],
+.tabs button:hover,
+.tabs button:focus-visible {
+  background: var(--red);
+  border-color: var(--red);
+}

@@ -1,0 +1,112 @@
+---
+import settings from '../data/settings.json';
+
+const pathname = new URL(Astro.request.url).pathname;
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: '/news', label: 'News' },
+  { href: '/gallery', label: 'Gallery' },
+];
+---
+
+<header id="hd">
+  <div class="wrap bar">
+    <a class="brand" href="/">
+      <img src="/logo.webp" alt="Logo ITPLN COMBAT" width="46" height="46" />
+      ITPLN COMBAT
+    </a>
+
+    <button
+      class="burger"
+      id="bg"
+      aria-expanded="false"
+      aria-controls="nav"
+      aria-label="Menu navigasi"
+    >
+      Menu
+    </button>
+
+    <nav id="nav" aria-label="Menu utama">
+      {navLinks.map((link) => {
+        const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+        return (
+          <a
+            href={link.href}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        );
+      })}
+
+      <div class="dd" id="dd">
+        <button id="dd-btn" aria-haspopup="true" aria-expanded="false">
+          More ▾
+        </button>
+        <div class="menu" id="dd-menu" role="menu">
+          <a
+            href={settings.link_form_daftar}
+            target="_blank"
+            rel="noopener noreferrer"
+            role="menuitem"
+          >
+            Daftar Anggota
+            <small>Isi formulir pendaftaran</small>
+          </a>
+          <a
+            href={settings.link_form_merch}
+            target="_blank"
+            rel="noopener noreferrer"
+            role="menuitem"
+          >
+            Pesan Merchandise
+            <small>Pesan baju lewat formulir</small>
+          </a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script is:inline>
+  // Mobile Nav & Dropdown Toggle
+  const burger = document.getElementById('bg');
+  const nav = document.getElementById('nav');
+  const dd = document.getElementById('dd');
+  const ddBtn = document.getElementById('dd-btn');
+
+  if (burger && nav) {
+    burger.addEventListener('click', () => {
+      const isOpen = nav.classList.toggle('open');
+      burger.setAttribute('aria-expanded', String(isOpen));
+    });
+  }
+
+  if (dd && ddBtn) {
+    ddBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = dd.classList.toggle('open');
+      ddBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!dd.contains(e.target)) {
+        dd.classList.remove('open');
+        ddBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        dd.classList.remove('open');
+        ddBtn.setAttribute('aria-expanded', 'false');
+        if (nav) {
+          nav.classList.remove('open');
+          if (burger) burger.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+  }
+</script>

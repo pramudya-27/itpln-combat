@@ -1,0 +1,89 @@
+---
+import '../styles/stats.css';
+import disciplinesData from '../data/disciplines.json';
+import aboutData from '../data/about.json';
+import { getAllNews, getAllGallery } from '../lib/content.js';
+
+const totalCabang = (disciplinesData.items || []).length;
+const totalSesiMingguan = (aboutData.jadwal?.items || []).length;
+const totalNews = (await getAllNews({ includeDrafts: false })).length;
+const totalGallery = (await getAllGallery({ includeDrafts: false })).length;
+
+const stats = [
+  { key: 'divisions', n: totalCabang, suffix: '', label: 'Cabang Bela Diri' },
+  { key: 'sessions', n: totalSesiMingguan, suffix: 'x', label: 'Latihan per Minggu' },
+  { key: 'news', n: totalNews, suffix: '', label: 'Berita Publik' },
+  { key: 'gallery', n: totalGallery, suffix: '', label: 'Foto Galeri' },
+];
+---
+
+<div class="wrap">
+  <div class="stats rev" id="st">
+    {stats.map((s) => (
+      <div>
+        <b data-stat-key={s.key} data-n={s.n} data-s={s.suffix || undefined}>
+          {s.n}{s.suffix || ''}
+        </b>
+        <span>{s.label}</span>
+      </div>
+    ))}
+  </div>
+</div>
+
+<script is:inline>
+  // CountUp Animation + Live Sync dari Admin API / Local Content
+  (async function initStats() {
+    const statsEl = document.getElementById('st');
+    if (!statsEl) return;
+
+    // Cek apakah ada data dinamis terbaru dari local/server API
+    try {
+      const res = await fetch('/api/admin/content');
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload.success && payload.data) {
+          const pubNews = (payload.data.news || []).filter(n => (n.status || 'Published').toLowerCase() !== 'draft').length;
+          const pubGal = (payload.data.gallery || []).filter(g => (g.status || 'Published').toLowerCase() !== 'draft').length;
+          const elNews = statsEl.querySelector('[data-stat-key="news"]');
+          const elGal = statsEl.querySelector('[data-stat-key="gallery"]');
+          if (elNews) { elNews.dataset.n = String(pubNews); elNews.textContent = String(pubNews); }
+          if (elGal) { elGal.dataset.n = String(pubGal); elGal.textContent = String(pubGal); }
+        }
+      }
+    } catch {}
+
+    let triggered = false;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !triggered) {
+            triggered = true;
+            const els = statsEl.querySelectorAll('[data-n]');
+            els.forEach((el) => {
+              const target = +el.dataset.n;
+              const suffix = el.dataset.s || '';
+              if (target === 0) {
+                el.textContent = '0' + suffix;
+                return;
+              }
+              const t0 = performance.now();
+              const duration = 900;
+
+              function step(t) {
+                const p = Math.min(1, (t - t0) / duration);
+                const eased = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(target * eased) + suffix;
+                if (p < 1) requestAnimationFrame(step);
+              }
+              requestAnimationFrame(step);
+            });
+            io.unobserve(statsEl);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    io.observe(statsEl);
+  })();
+</script>

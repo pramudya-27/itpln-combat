@@ -1,0 +1,299 @@
+---
+import '../styles/modal.css';
+---
+
+<div
+  id="news-modal"
+  class="news-modal-overlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Detail Berita"
+  style="display: none;"
+>
+  <div class="news-modal-card" id="news-modal-card">
+    <button
+      id="news-modal-close"
+      class="news-modal-close"
+      type="button"
+      aria-label="Tutup detail berita"
+      title="Tutup (Esc)"
+    >
+      ✕
+    </button>
+
+    <div class="news-modal-header" id="news-modal-header">
+      <div class="ph" id="news-modal-ph">
+        <span id="news-modal-ph-span">ITPLN</span>
+        <img
+          id="news-modal-img"
+          alt="Foto Berita"
+          class="hidden"
+          style="display: none;"
+          onerror="this.style.display='none'; document.getElementById('news-modal-ph-span').style.display='block';"
+        />
+      </div>
+    </div>
+
+    <div class="news-modal-body">
+      <div class="news-modal-meta">
+        <span class="cat" id="news-modal-cat">Kegiatan</span>
+        <span class="news-status-badge status-active" id="news-modal-status">
+          ● ACTIVE
+        </span>
+      </div>
+
+      <!-- Banner Peringatan Arsip bila Berita EXPIRED -->
+      <div
+        id="news-modal-expired-banner"
+        class="hidden mb-4 p-3 border-l-4 border-[#e74c3c] bg-[#2a1215] text-xs text-gray-200"
+      >
+        <strong class="text-[#ff6b6b] uppercase tracking-wider block mb-0.5">
+          ⚠️ Arsip Berita (Masa Berlaku Berakhir)
+        </strong>
+        <span>Masa berlaku informasi/agenda ini telah lewat dan tetap ditampilkan sebagai dokumentasi arsip.</span>
+      </div>
+
+      <h2 class="news-modal-title" id="news-modal-title">Judul Berita</h2>
+
+      <div class="text-xs text-mute mb-4" id="news-modal-author-row">
+        Oleh: <strong class="text-white" id="news-modal-author">Tim Humas ITPLN COMBAT</strong>
+      </div>
+
+      <!-- Durasi Postingan (startDate s/d endDate dalam Asia/Jakarta WIB) -->
+      <div class="news-duration-box" id="news-duration-box">
+        <div class="duration-row">
+          <span class="duration-label">Mulai Berlaku:</span>
+          <span class="duration-val" id="news-duration-start">-</span>
+        </div>
+        <div class="duration-row">
+          <span class="duration-label">Berakhir Pada:</span>
+          <span class="duration-val" id="news-duration-end">-</span>
+        </div>
+      </div>
+
+      <div class="news-modal-text" id="news-modal-content">
+        Konten berita lengkap...
+      </div>
+
+      <div class="news-modal-footer gap-3 flex-wrap">
+        <a
+          id="news-modal-full-link"
+          href="/news"
+          class="btn ghost text-sm"
+        >
+          Halaman Artikel Lengkap →
+        </a>
+        <button type="button" class="btn text-sm" id="news-modal-footer-btn">
+          Tutup Berita
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  const newsModal = document.getElementById('news-modal');
+  const newsCloseBtn = document.getElementById('news-modal-close');
+  const newsFooterBtn = document.getElementById('news-modal-footer-btn');
+  const modalFullLink = document.getElementById('news-modal-full-link');
+
+  const modalCat = document.getElementById('news-modal-cat');
+  const modalStatus = document.getElementById('news-modal-status');
+  const modalExpiredBanner = document.getElementById('news-modal-expired-banner');
+  const modalTitle = document.getElementById('news-modal-title');
+  const modalAuthor = document.getElementById('news-modal-author');
+  const modalStart = document.getElementById('news-duration-start');
+  const modalEnd = document.getElementById('news-duration-end');
+  const modalContent = document.getElementById('news-modal-content');
+  const modalPh = document.getElementById('news-modal-ph');
+  const modalPhSpan = document.getElementById('news-modal-ph-span');
+  const modalImg = document.getElementById('news-modal-img');
+
+  const gradients = [
+    'linear-gradient(135deg, #8f0c12, #000)',
+    'linear-gradient(135deg, #1a1a2e, #000)',
+    'linear-gradient(135deg, #5c0a0e, #000)',
+    'linear-gradient(135deg, #2b2b2f, #000)',
+    'linear-gradient(135deg, #b0141b, #000)',
+  ];
+
+  function parseJakartaMs(raw, isEnd) {
+    if (!raw) return null;
+    const s = String(raw).trim();
+    if (!s) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+      return Date.parse(s + (isEnd ? 'T23:59:59.999+07:00' : 'T00:00:00.000+07:00'));
+    }
+    const norm = s.replace(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/, '$1T$2');
+    const hasTz = /([Zz]|[+-]\d{2}:?\d{2})$/.test(norm);
+    const ms = Date.parse(hasTz ? norm : norm + '+07:00');
+    return Number.isNaN(ms) ? null : ms;
+  }
+
+  function formatIDDateWIB(str) {
+    const ms = parseJakartaMs(str, false);
+    if (ms === null) return '';
+    try {
+      return (
+        new Intl.DateTimeFormat('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(ms)) + ' WIB'
+      );
+    } catch {
+      return str;
+    }
+  }
+
+  function checkStatusWIB(startStr, endStr) {
+    const now = Date.now();
+    const startMs = parseJakartaMs(startStr, false);
+    const endMs = parseJakartaMs(endStr, true);
+    if (startMs !== null && now < startMs) {
+      return { code: 'Upcoming', text: '● UPCOMING', cls: 'status-scheduled' };
+    }
+    if (endMs !== null && now > endMs) {
+      return { code: 'Expired', text: '● EXPIRED', cls: 'status-expired' };
+    }
+    return { code: 'Active', text: '● ACTIVE', cls: 'status-active' };
+  }
+
+  let lastTrigger = null;
+
+  function openNewsDetail(card) {
+    if (!newsModal) return;
+    lastTrigger = card;
+
+    const judul = card.dataset.judul || '';
+    const slug = card.dataset.slug || '';
+    const kategori = card.dataset.kategori || '';
+    const author = card.dataset.author || 'Tim Humas ITPLN COMBAT';
+    const konten = card.dataset.konten || card.dataset.ringkasan || '';
+    const foto = card.dataset.foto || '';
+    const mulai = card.dataset.mulai || '';
+    const selesai = card.dataset.selesai || '';
+    const colorIdx = parseInt(card.dataset.color || '0', 10);
+
+    if (modalTitle) modalTitle.textContent = judul;
+    if (modalCat) modalCat.textContent = kategori;
+    if (modalAuthor) modalAuthor.textContent = author;
+    if (modalContent) modalContent.textContent = konten;
+    if (modalFullLink) {
+      modalFullLink.href = slug ? `/news/${slug}` : '/news';
+    }
+
+    const st = checkStatusWIB(mulai, selesai);
+    if (modalStatus) {
+      modalStatus.textContent = st.text;
+      modalStatus.className = 'news-status-badge ' + st.cls;
+    }
+    if (modalExpiredBanner) {
+      modalExpiredBanner.classList.toggle('hidden', st.code !== 'Expired');
+    }
+
+    if (modalStart) modalStart.textContent = formatIDDateWIB(mulai) || '-';
+    if (modalEnd) modalEnd.textContent = formatIDDateWIB(selesai) || 'Tanpa Batas Waktu';
+
+    if (foto) {
+      if (modalImg) {
+        modalImg.src = foto;
+        modalImg.alt = judul;
+        modalImg.style.display = 'block';
+        modalImg.classList.remove('hidden');
+      }
+      if (modalPhSpan) {
+        modalPhSpan.style.display = 'none';
+        modalPhSpan.classList.add('hidden');
+      }
+      if (modalPh) modalPh.style.background = '#111';
+    } else {
+      if (modalImg) {
+        modalImg.removeAttribute('src');
+        modalImg.style.display = 'none';
+        modalImg.classList.add('hidden');
+      }
+      if (modalPhSpan) {
+        modalPhSpan.style.display = 'block';
+        modalPhSpan.classList.remove('hidden');
+        modalPhSpan.textContent = 'ITPLN';
+      }
+      if (modalPh) modalPh.style.background = gradients[colorIdx % gradients.length];
+    }
+
+    newsModal.classList.remove('hidden');
+    newsModal.classList.add('active', 'on');
+    newsModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    setTimeout(() => {
+      if (newsCloseBtn) newsCloseBtn.focus();
+    }, 50);
+  }
+
+  function closeNewsDetail() {
+    if (!newsModal) return;
+    newsModal.classList.remove('active', 'on');
+    newsModal.classList.add('hidden');
+    newsModal.style.display = 'none';
+    document.body.style.overflow = '';
+
+    if (lastTrigger) {
+      try {
+        lastTrigger.focus();
+      } catch (err) {}
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#news-modal-close') || e.target.closest('.news-modal-close')) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeNewsDetail();
+      return;
+    }
+
+    if (e.target.closest('#news-modal-footer-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeNewsDetail();
+      return;
+    }
+
+    if (e.target === newsModal) {
+      e.preventDefault();
+      closeNewsDetail();
+      return;
+    }
+
+    // Jika mengklik tombol link langsung ke halaman detail (/news/[slug]), biarkan navigasi normal
+    if (e.target.closest('[data-direct-link]')) {
+      return;
+    }
+
+    const card = e.target.closest('.news-card-trigger');
+    if (card) {
+      e.preventDefault();
+      openNewsDetail(card);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (newsModal && newsModal.style.display !== 'none' && !newsModal.classList.contains('hidden')) {
+        closeNewsDetail();
+      }
+    }
+    if (e.key === 'Enter' || e.key === ' ') {
+      const activeEl = document.activeElement;
+      if (activeEl && activeEl.classList.contains('news-card-trigger')) {
+        e.preventDefault();
+        openNewsDetail(activeEl);
+      }
+    }
+  });
+</script>

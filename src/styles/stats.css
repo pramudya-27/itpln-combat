@@ -1,0 +1,36 @@
+/* Stats Grid */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.stats div {
+  padding: 34px 20px;
+  border-right: 1px solid var(--line);
+}
+
+.stats div:last-child {
+  border-right: 0;
+}
+
+.stats b {
+  display: block;
+  font: 400 clamp(52px, 7vw, 84px) Anton, sans-serif;
+  color: var(--red);
+  line-height: 1;
+}
+
+.stats span {
+  color: var(--mute);
+  font: 700 16px "Barlow Condensed", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 600px) {
+  .stats div:nth-child(even) {
+    border-right: 0;
+  }
+}

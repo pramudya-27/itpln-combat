@@ -5,6 +5,7 @@
 [build.environment]
   NODE_VERSION = "20"
   TZ = "Asia/Jakarta"
+  SECRETS_SCAN_OMIT_KEYS = "TZ,NODE_VERSION"
 
 [[redirects]]
   from = "/cms"
